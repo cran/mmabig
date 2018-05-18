@@ -1,0 +1,21 @@
+exportPattern("^[^\\.]")
+import(glmnet,mma,car,gplots,splines,survival)
+importFrom("graphics", "boxplot")
+importFrom("stats", "coef", "model.matrix")
+importFrom("utils", "tail")
+importFrom("grDevices", "rainbow")
+importFrom("graphics", "axis", "barplot", "hist", "lines", "par",
+          "plot")
+importFrom("stats", "binomial", "chisq.test", "cor.test", "gaussian",
+           "glm", "loess", "predict", "qnorm", "quantile", "rbinom",
+           "rmultinom", "rnorm", "sd", "var")
+importFrom("graphics", "abline", "polygon")
+importFrom("stats", "scatter.smooth")
+importFrom("stats", "weighted.mean")
+S3method(summary,med_iden.big)
+S3method(print,summary.med_iden.big)
+S3method(print,med.big)
+S3method(summary,mma.big)
+S3method(print,summary.mma.big)
+S3method(print,mma.big)
+S3method(plot,mma.big)
