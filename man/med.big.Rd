@@ -11,7 +11,8 @@ med.big(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm,
                   contm = data$contm, catm = data$catm, jointm = data$jointm, 
                   allm = c(contm, binm, unique(unlist(catm)[-1])),margin=1,
                   df=1,family1=data$family1,refy=rep(NA,ncol(y)), 
-                  binpred=data$binpred,type=NULL,w=NULL,alpha=1)
+                  binpred=data$binpred,type=NULL,w=NULL,alpha=1,
+                  lambda=exp(seq(log(0.001), log(5), length.out=15)))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -57,6 +58,9 @@ the weight for each case in x.
 }
   \item{alpha}{
 the elasticnet mixing parameter such that 0<=alpha<=1, with alpha=1 is the lasso penalty, and alpha=0 be the ridge penalty. By default, alpha=1.
+}
+  \item{lambda}{
+the lambda sequence when fit cv.glmnet. By default, it is exp(seq(log(0.001), log(5), length.out=15)).
 }
 }
 \details{

@@ -10,7 +10,8 @@ Do a preliminary data analysis to identify potential mediators and covariates. E
 data.org.big(x,y,pred,mediator=NULL,contmed=NULL,binmed=NULL,binref=NULL,catmed=NULL,
                        catref=NULL,jointm=NULL, 
                        family1=as.list(rep(NA,ncol(data.frame(y)))),
-                       predref=NULL,alpha=1,alpha1=0.01,alpha2=0.01,testtype=2, w=NULL)
+                       predref=NULL,alpha=1,alpha1=0.01,alpha2=0.01,testtype=2, w=NULL,
+                       lambda=exp(seq(log(0.001), log(5), length.out=15)))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -65,6 +66,9 @@ the significant level at which to test if a potential mediator is related with t
   \item{testtype}{if the testtype is 1, covariates/mediators are identified using full model; if the testtype is 2 (by default), covariates/mediators are tested one by one in models with the predictor only.
 }
   \item{w}{the weight for data analysis, by default is rep(1,length(y)).
+}
+  \item{lambda}{
+the lambda sequence when fit cv.glmnet. By default, it is exp(seq(log(0.001), log(5), length.out=15)).
 }
 }
 

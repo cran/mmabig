@@ -12,7 +12,8 @@ mma.big(data=NULL,x=data$x, y=data$y,pred=data$dirx, mediator=NULL, binm=data$bi
         contm=data$contm,catm=data$catm,jointm=data$jointm,margin=1,df=1,binref=NULL,
         catref=NULL,predref=NULL,alpha=1,alpha1=0.01,alpha2=0.01,
         family1=data$family1,n2=50,w=rep(1,nrow(x)),
-        refy=NULL,pred.new=NULL,binpred=data$binpred,type=NULL,w.new=NULL)
+        refy=NULL,pred.new=NULL,binpred=data$binpred,type=NULL,w.new=NULL,
+        lambda=exp(seq(log(0.001), log(5), length.out=15)))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -89,6 +90,9 @@ the type of prediction when y is class Surv. Is "risk" if not specified.
   \item{w.new}{
 the weights for new.x.
 }
+  \item{lambda}{
+the lambda sequence when fit cv.glmnet. By default, it is exp(seq(log(0.001), log(5), length.out=15)).
+}
 }
 \details{
 mma first tests if the potential mediators defined by binm, contm, and catm should be treated as mediators or covariates (if none, the variable will be deleted from further analysis). All variables identified by jointm are treated as mediators. All other variables in x that are not tested are treated as covariates. Then mma does the mediation effects estimation and inference on the selected variables.  
@@ -158,6 +162,8 @@ summary(mma.e1)
 summary(mma.e1.2,RE=TRUE)
 plot(mma.e1.2,vari="m16")
 plot(mma.e1.2,vari="m11")
+joint.effect(mma.e1.2,vari=c("m11","m16")) #find the joint effect of m11 and m16
+joint.effect(mma.e1.2,vari="m16") #find the joint effect of m16
 
 \donttest{
 #b. binary y

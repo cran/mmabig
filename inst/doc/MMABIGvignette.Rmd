@@ -1,0 +1,300 @@
+---
+title: "Examples for Big Data Mediation Analysis"
+author: 
+  - Qingzhao Yu and Lin Zhu
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    keep_md: true
+    fig_caption: yes
+bibliography: vignette.bib
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Examples for Big Data Mediation Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  error=TRUE,
+  warning=FALSE
+)
+```
+
+## Package installation
+R package mmabig is used for general multiple mediation/confounding analysis with high dimensional data sets [@Yu2018b]. Mediation/confounding effects refer to the effects from third variables that intervene the relationship between an exposure and an outcome. In the following we generally call the mediation/confounding effect as the third-variable effect (TVE). TVEs include the total effect between the exposure and the outcome, direct effect from the exposure to outcome after adjusting for other variables, and indirect effect of a third variable (the effect from the exposure variable to the third variable and to the outcome), which are defined and the statistical inferences described in @Yu2018b. In mmabig, a generalized linear model with LASSO or elastic net regularization is used to fit the final model. If readers are interested in using a generalized linear model or multiple Additive Regression Trees (MART) to fit the model, please refer to the R package mma [@Yu2017a].     
+
+To use the R package mmabig, we first install the package in R (`install.packages("mmabig")`) and load it. 
+
+```{r, include=F}
+library(mmabig)
+```
+
+
+## Data Organization and Identify Potential Moderators/Confounders
+The function data.org.big is used to do a preliminary data analysis to identify potential Mediators/Confounders (MCs) and covariates. It returns an object of "med_iden" class that organizes the data into a format to be used directly for the mediation analysis functions. 
+
+
+### One binary/continuous predictor and one binary/continuous outcome
+The following code generates a simulated data set with 20 potential MCs, of which five (m16-m20) are multicategorical variables. The real mediator/confounders are "m11", "m12", and "m16", which are highly related with both the predictor "pred" and the outcome "y". 
+```{r}
+# a binary predictor
+set.seed(1)
+n=100
+pred=rbinom(n,1,0.5)
+m1=matrix(rnorm(n*10),n,10)
+m2<-matrix(rnorm(n*10,mean=pred,sd=1),n,10)
+m3.1=m2[,6:10]
+m3=m3.1
+m2=m2[,1:5]
+m3[m3.1<=0.1]=0
+m3[0.1<m3.1 & m3.1<=1]=1
+m3[m3.1>1]=2
+m3<-apply(m3,2,as.factor)
+m<-data.frame(m1,m2,m3)
+colnames(m)<-c(paste("m0",1:9,sep=""),paste("m",10:20,sep=""))
+
+lu<--0.5363+0.701*pred+0.801*m[,1]+0.518*m[,2]+1.402*m[,11]+0.773*m[,12]+
+    ifelse(m[,16]=="2",2.15,0)+ifelse(m[,16]=="1",0.201,0)
+
+# a continuous y
+y<-rnorm(n,lu,1)
+```
+
+Next, we use the function "data.org.big" to identify mediators. The exposure variable is specified by "pred=". All potential MCs and covariates are in the dataframe "x". The outcome variable is "y". Both the exposure and the outcome can be multivariate. The "mediator=1:ncol(m)" indicates that all variables in x should be tested for potential MCs.  Two tests are needed to identify a potential MC: first, the variable is significantly related with the predictor adjusting for other covariates. The significance level is set by "alpha2", whose default value is 0.01. Second, the variable has to be significantly related with the outcome not adjusting (testtype=2, by default) or adjusting (testtype=2) for the predictor and other variables. The significance level is set by "alpha1". In the following example, p-value 1 shows the results for the second test, and p-value 2 are the results for the first test. A variable that passes the second test but not the first test is considered as a covariate. Variables do not pass the second test are not adopted in further analysis. Variables in "x" but not in "mediator" are forced in further analysis as covariates. The argument "alpha" is the elasticnet mixing parameter such that $0\leq alpha\leq 1$, with alpha=1 be the lasso penalty, and alpha=0 be the ridge penalty. By default, alpha=1.
+
+```{r}
+data.e1<-data.org.big(x=m,y=data.frame(y),mediator=1:ncol(m),
+                      pred=data.frame(pred),testtype=1)
+summary(data.e1,only=TRUE)
+```
+
+The results from "data.org.big" function are summarized by the "summary" function. When "only=TRUE", it only shows the test results for selected covariates and mediators. The multicategorical mediator "m16" has 3 categories, and it has been binarized into two binary variables "m161" and "m162", and they are selected as potential mediators together. We specify testtype=1 in the above example to identify covariates/mediators using full model. By default, testtype=2 is used that covariates/mediators are tested one by one in models with the predictor only. The following codes show the results when testtype is 2.
+```{r}
+data.e1.2<-data.org.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred))
+summary(data.e1.2,only=TRUE)
+```
+
+### Survival outcome
+The functions in mmabig can deal with binary, categorical, continuous, or time-to-event outcomes. If the outcome is time-to-event, it should be defined by the "Surv" function in the survival package. The following is an example.
+```{r}
+lambda=1/500
+survt=-log(runif(n))/lambda/exp(lu)
+st=round(runif(n,1,500),0)
+time=ifelse(st+survt>600,600,st+survt)-st
+cen=ifelse(st+survt>600,0,1)
+y=Surv(time,cen)
+
+data.e3<-data.org.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),testtype=1)
+summary(data.e3,only=TRUE)
+```
+
+```{r, include=F}
+data.e3.2<-data.org.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),
+                        alpha1=0.05,alpha2=0.05)
+summary(data.e3.2,only=TRUE)
+```
+
+### Multivariate predictors
+In addition, the package can handle multivariate and multicategorical predictors. If the predictor is multicategorical of k levels, "data.org.big" first transforms the predictor to k-1 binary predictors. If a variable significantly relates with any of the k-1 predictors, the variable passes the first test described above. P-value 2 is shown for each predictor. In the following example, the predictor has three levels. 
+
+```{r}
+# multicategorical predictor
+set.seed(1)
+n=100
+pred=rmultinom(100,1,c(0.5, 0.3, 0.2))
+pred=pred[1,]*0+pred[2,]*1+pred[3,]*2
+m1=matrix(rnorm(n*10),n,10)
+m2<-matrix(rnorm(n*10,mean=pred,sd=1),n,10)
+m3.1=m2[,6:10]
+m2=m2[,1:5]
+m3=m3.1
+m3[m3.1<=0.1]=0
+m3[0.1<m3.1 & m3.1<=1]=1
+m3[m3.1>1]=2
+m3<-apply(m3,2,as.factor)
+m<-data.frame(m1,m2,m3)
+colnames(m)<-c(paste("m0",1:9,sep=""),paste("m",10:20,sep=""))
+pred<-as.factor(pred)
+# continuous y
+lu<--0.5363+ifelse(pred=="1",0.3,0)+ifelse(pred=="2",0.7,0)+0.801*m[,1]+0.518*m[,2]+
+    1.402*m[,11]+0.773*m[,12]+ifelse(m[,16]=="2",2.15,0)+ifelse(m[,16]=="1",0.201,0)
+y<-rnorm(n,lu,1)
+
+data.m.e1<-data.org.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),testtype=1)
+summary(data.m.e1,only=TRUE)
+```
+
+In the following example, the predictor is bivariate. 
+```{r}
+# multivariate predictor
+set.seed(1)
+n=100
+pred=cbind(runif(n,-1,1),rnorm(n))
+m1=matrix(rnorm(n*10),n,10)
+m2<-matrix(rnorm(n*5,mean=0.3*pred[,1]+0.4*pred[,2],sd=1),n,5)
+m3.1=matrix(rnorm(n*5,mean=0.7*pred[,1]+0.8*pred[,2],sd=1),n,5)
+m3=m3.1
+m3[m3.1<=0]=0
+m3[0<m3.1 & m3.1<=1.28]=1
+m3[m3.1>1.28]=2
+m3<-apply(m3,2,as.factor)
+m<-data.frame(m1,m2,m3)
+colnames(m)<-c(paste("m0",1:9,sep=""),paste("m",10:20,sep=""))
+colnames(pred)=c("x1","x2")
+# binary y
+lu<--0.6852+0.3*pred[,1]+0.7*pred[,2]+0.801*m[,1]+0.518*m[,2]+1.402*m[,11]+0.773*m[,12]+
+     ifelse(m[,16]=="2",2.15,0)+ifelse(m[,16]=="1",0.201,0)
+y<-rbinom(n,1,exp(lu)/(1+exp(lu)))
+
+data.m.c.e2<-data.org.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),
+                          testtype=1,alpha1=0.05,alpha2=0.05)
+summary(data.m.c.e2,only=TRUE)
+```
+
+
+### Multivariate outcomes
+Similarly, the package can deal with multivariate outcomes. The following code deals with multivariate predictors and multivariate responses. If the variable is significantly related with any one of the outcomes, it passes the second test described above. The results from "data.org.big" are summarized for each combination of the exposure-outcome relationship.
+```{r}
+# multivariate predictor
+set.seed(1)
+n=100
+pred=cbind(runif(n,-1,1),rnorm(n))
+m1=matrix(rnorm(n*10),n,10)
+m2<-matrix(rnorm(n*5,mean=0.3*pred[,1]+0.4*pred[,2],sd=1),n,5)
+m3.1=matrix(rnorm(n*5,mean=0.7*pred[,1]+0.8*pred[,2],sd=1),n,5)
+m3=m3.1
+m3[m3.1<=0]=0
+m3[0<m3.1 & m3.1<=1.28]=1
+m3[m3.1>1.28]=2
+m3<-apply(m3,2,as.factor)
+m<-data.frame(m1,m2,m3)
+colnames(m)<-c(paste("m0",1:9,sep=""),paste("m",10:20,sep=""))
+colnames(pred)=c("x1","x2")
+#multivariate responses
+y<-cbind(rnorm(n,lu,1),rbinom(n,1,exp(lu)/(1+exp(lu))))
+colnames(y)=c("y1","y2")
+
+data.m.m.c.e2<-data.org.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),
+                            testtype=1,alpha1=0.05,alpha2=0.05)
+summary(data.m.m.c.e2,only=TRUE)
+
+data.m.m.c.e2.2<-data.org.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),
+                              alpha1=0.05,alpha2=0.05)
+summary(data.m.m.c.e2.2,only=TRUE)
+```
+ 
+ 
+##Third-Variable Effect Analysis
+Next, we use med.big function to estimate the TVE using the results from data.org.big function. 
+
+### Binary predictor and continuous outcome
+```{r}
+med.e1<-med.big(data.e1)
+```
+
+To show the results:
+```{r}
+med.e1
+```
+
+
+### Survival outcome
+For survival outcome, the default option is to fit the final full model using Cox proportional hazard model. 
+
+```{r, include = FALSE}
+med.e3<-med.big(data.e3)
+med.e3
+```
+
+
+### Multivariate outcomes
+```{r}
+med.m.m.c.e2.2<-med.big(data.m.m.c.e2.2)
+med.m.m.c.e2.2
+```
+
+
+```{r,include=F}
+#print.med.big can be used to print the estimation of mediation effects from an med.big object with a user-defined new set of predictors.
+pred.new=cbind(runif(10,-1,1),rnorm(10))
+colnames(pred.new)=c("x1","x2")
+print(med.m.m.c.e2.2,pred.new=pred.new)
+```
+
+
+## Combined function for multiple TVE analysis with big data sets
+The "mma.big" is a function that automatically identify potential MCs, based on which to make statistical inference on the mediation effects for high-dimensional data sets. Bootstrap method is used to make inferences on the TVE. The summary function is used to summarize inference results. In the summary function, three different sets of confidence intervals are calculated: based on the normal assumption of bootstrap method (lwbd, upbd), on the quantiles (lwbd_q,upbd_q), and on the confidence ball (lwbd_b, upbd_b) [@Yu2018c].
+
+```{r, fig.show='hold', fig.height=5, fig.width=7}
+set.seed(1)
+n=100
+pred=rbinom(n,1,0.5)
+m1=matrix(rnorm(n*10),n,10)
+m2<-matrix(rnorm(n*10,mean=pred,sd=1),n,10)
+m3.1=m2[,6:10]
+m3=m3.1
+m2=m2[,1:5]
+m3[m3.1<=0.1]=0
+m3[0.1<m3.1 & m3.1<=1]=1
+m3[m3.1>1]=2
+m3<-apply(m3,2,as.factor)
+m<-data.frame(m1,m2,m3)
+colnames(m)<-c(paste("m0",1:9,sep=""),paste("m",10:20,sep=""))
+
+lu<--0.5363+0.701*pred+0.801*m[,1]+0.518*m[,2]+1.402*m[,11]+0.773*m[,12]+
+    ifelse(m[,16]=="2",2.15,0)+ifelse(m[,16]=="1",0.201,0)
+y<-rnorm(n,lu,1)
+
+mma.e1<-mma.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),
+                alpha=1,alpha1=0.05,alpha2=0.05,n2=3)  #use only the test results.
+summary(mma.e1)
+```
+
+mma.big also accepts the organized dataset from data.org.big as the first argument.
+
+```{r, fig.show='hold', fig.height=5, fig.width=7}
+mma.e1.2<-mma.big(data=data.e1.2,alpha1=0.05,alpha2=0.05,n2=3) 
+summary(mma.e1.2,RE=TRUE)
+```  
+
+
+### Plots of the fitted mma object from boot.med
+plot.mma.big() plots the marginal effect of the selected variable on the outcome, and the marginal effect of the predictor on the selected variable. 
+
+```{r, fig.height=7, fig.width=5} 
+#plot(mma.e1.2,vari="m16")
+plot(mma.e1.2,vari="m11")
+```
+
+In the above figure, the upper panel shows the coefficient of "m11" when it is used to estimate y in an elasticnet regression with y being the outcome in bootstrap samples. We see that the coefficient is significantly positive. The lower panel shows when the exposure variable increases by 1 unit, the average change in "m11". Again we see that the change in "m11" is positive. Therefore, there is a significant indirect effect (positive) through "m11". As is shown by summary results, all confidence intervals for the indirect effect of "m11" are to the right of 0.
+
+### Survival outcome
+```{r, fig.show='hold', fig.height=5, fig.width=7}
+lambda=1/500
+survt=-log(runif(n))/lambda/exp(lu)
+st=round(runif(n,1,500),0)
+time=ifelse(st+survt>600,600,st+survt)-st
+cen=ifelse(st+survt>600,0,1)
+y=Surv(time,cen)
+
+mma.e3<-mma.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),alpha=1,alpha1=0.05,
+                alpha2=0.05,n2=3)  #use only the test results.
+mma.e3.2<-mma.big(data=data.e3.2,alpha1=0.05,alpha2=0.05,n2=3)  #use only the test results.
+summary(mma.e3)
+summary(mma.e3.2,RE=TRUE,quant=FALSE)
+```
+
+We can also plot the selected variables on the survival outcome.
+```{r, fig.height=7, fig.width=5}
+plot(mma.e3.2,vari="m16")
+plot(mma.e3.2,vari="m11")
+```
+
+
+## References
+
+

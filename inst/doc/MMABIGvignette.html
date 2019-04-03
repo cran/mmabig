@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Qingzhao Yu and Lin Zhu" />
+
+<meta name="date" content="2019-04-03" />
+
+<title>Examples for Big Data Mediation Analysis</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Examples for Big Data Mediation Analysis</h1>
+<h4 class="author">Qingzhao Yu and Lin Zhu</h4>
+<h4 class="date">2019-04-03</h4>
+
+
+
+<div id="package-installation" class="section level2">
+<h2>Package installation</h2>
+<p>R package mmabig is used for general multiple mediation/confounding analysis with high dimensional data sets <span class="citation">(Li et al. <a href="#ref-Yu2018b">2018</a>)</span>. Mediation/confounding effects refer to the effects from third variables that intervene the relationship between an exposure and an outcome. In the following we generally call the mediation/confounding effect as the third-variable effect (TVE). TVEs include the total effect between the exposure and the outcome, direct effect from the exposure to outcome after adjusting for other variables, and indirect effect of a third variable (the effect from the exposure variable to the third variable and to the outcome), which are defined and the statistical inferences described in <span class="citation">Li et al. (<a href="#ref-Yu2018b">2018</a>)</span>. In mmabig, a generalized linear model with LASSO or elastic net regularization is used to fit the final model. If readers are interested in using a generalized linear model or multiple Additive Regression Trees (MART) to fit the model, please refer to the R package mma <span class="citation">(Yu and Li <a href="#ref-Yu2017a">2017</a>)</span>.</p>
+<p>To use the R package mmabig, we first install the package in R (<code>install.packages(&quot;mmabig&quot;)</code>) and load it.</p>
+</div>
+<div id="data-organization-and-identify-potential-moderatorsconfounders" class="section level2">
+<h2>Data Organization and Identify Potential Moderators/Confounders</h2>
+<p>The function data.org.big is used to do a preliminary data analysis to identify potential Mediators/Confounders (MCs) and covariates. It returns an object of “med_iden” class that organizes the data into a format to be used directly for the mediation analysis functions.</p>
+<div id="one-binarycontinuous-predictor-and-one-binarycontinuous-outcome" class="section level3">
+<h3>One binary/continuous predictor and one binary/continuous outcome</h3>
+<p>The following code generates a simulated data set with 20 potential MCs, of which five (m16-m20) are multicategorical variables. The real mediator/confounders are “m11”, “m12”, and “m16”, which are highly related with both the predictor “pred” and the outcome “y”.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># a binary predictor</span>
+<span class="kw">set.seed</span>(<span class="dv">1</span>)
+n=<span class="dv">100</span>
+pred=<span class="kw">rbinom</span>(n,<span class="dv">1</span>,<span class="fl">0.5</span>)
+m1=<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">10</span>),n,<span class="dv">10</span>)
+m2&lt;-<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">10</span>,<span class="dt">mean=</span>pred,<span class="dt">sd=</span><span class="dv">1</span>),n,<span class="dv">10</span>)
+m3.<span class="dv">1</span>=m2[,<span class="dv">6</span><span class="op">:</span><span class="dv">10</span>]
+m3=m3.<span class="dv">1</span>
+m2=m2[,<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]
+m3[m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="fl">0.1</span>]=<span class="dv">0</span>
+m3[<span class="fl">0.1</span><span class="op">&lt;</span>m3.<span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="dv">1</span>]=<span class="dv">1</span>
+m3[m3.<span class="dv">1</span><span class="op">&gt;</span><span class="dv">1</span>]=<span class="dv">2</span>
+m3&lt;-<span class="kw">apply</span>(m3,<span class="dv">2</span>,as.factor)
+m&lt;-<span class="kw">data.frame</span>(m1,m2,m3)
+<span class="kw">colnames</span>(m)&lt;-<span class="kw">c</span>(<span class="kw">paste</span>(<span class="st">&quot;m0&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">9</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>),<span class="kw">paste</span>(<span class="st">&quot;m&quot;</span>,<span class="dv">10</span><span class="op">:</span><span class="dv">20</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>))
+
+lu&lt;-<span class="op">-</span><span class="fl">0.5363</span><span class="op">+</span><span class="fl">0.701</span><span class="op">*</span>pred<span class="op">+</span><span class="fl">0.801</span><span class="op">*</span>m[,<span class="dv">1</span>]<span class="op">+</span><span class="fl">0.518</span><span class="op">*</span>m[,<span class="dv">2</span>]<span class="op">+</span><span class="fl">1.402</span><span class="op">*</span>m[,<span class="dv">11</span>]<span class="op">+</span><span class="fl">0.773</span><span class="op">*</span>m[,<span class="dv">12</span>]<span class="op">+</span>
+<span class="st">    </span><span class="kw">ifelse</span>(m[,<span class="dv">16</span>]<span class="op">==</span><span class="st">&quot;2&quot;</span>,<span class="fl">2.15</span>,<span class="dv">0</span>)<span class="op">+</span><span class="kw">ifelse</span>(m[,<span class="dv">16</span>]<span class="op">==</span><span class="st">&quot;1&quot;</span>,<span class="fl">0.201</span>,<span class="dv">0</span>)
+
+<span class="co"># a continuous y</span>
+y&lt;-<span class="kw">rnorm</span>(n,lu,<span class="dv">1</span>)</code></pre></div>
+<p>Next, we use the function “data.org.big” to identify mediators. The exposure variable is specified by “pred=”. All potential MCs and covariates are in the dataframe “x”. The outcome variable is “y”. Both the exposure and the outcome can be multivariate. The “mediator=1:ncol(m)” indicates that all variables in x should be tested for potential MCs. Two tests are needed to identify a potential MC: first, the variable is significantly related with the predictor adjusting for other covariates. The significance level is set by “alpha2”, whose default value is 0.01. Second, the variable has to be significantly related with the outcome not adjusting (testtype=2, by default) or adjusting (testtype=2) for the predictor and other variables. The significance level is set by “alpha1”. In the following example, p-value 1 shows the results for the second test, and p-value 2 are the results for the first test. A variable that passes the second test but not the first test is considered as a covariate. Variables do not pass the second test are not adopted in further analysis. Variables in “x” but not in “mediator” are forced in further analysis as covariates. The argument “alpha” is the elasticnet mixing parameter such that <span class="math inline">\(0\leq alpha\leq 1\)</span>, with alpha=1 be the lasso penalty, and alpha=0 be the ridge penalty. By default, alpha=1.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data.e1&lt;-<span class="kw">data.org.big</span>(<span class="dt">x=</span>m,<span class="dt">y=</span><span class="kw">data.frame</span>(y),<span class="dt">mediator=</span><span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(m),
+                      <span class="dt">pred=</span><span class="kw">data.frame</span>(pred),<span class="dt">testtype=</span><span class="dv">1</span>)
+<span class="kw">summary</span>(data.e1,<span class="dt">only=</span><span class="ot">TRUE</span>)
+<span class="co">#&gt; Identified as mediators: </span>
+<span class="co">#&gt; [1] &quot;m11&quot;  &quot;m12&quot;  &quot;m161&quot; &quot;m162&quot;</span>
+<span class="co">#&gt; Selected as covariates: </span>
+<span class="co">#&gt; [1] &quot;m01&quot; &quot;m02&quot;</span>
+<span class="co">#&gt; Tests: </span>
+<span class="co">#&gt;        Coefficients.y P-Value 2.pred</span>
+<span class="co">#&gt; m01             0.702          0.548</span>
+<span class="co">#&gt; m02             0.534          0.920</span>
+<span class="co">#&gt; m11 *           1.180          0.000</span>
+<span class="co">#&gt; m12 *           0.479          0.000</span>
+<span class="co">#&gt; m161 *          0.000          0.000</span>
+<span class="co">#&gt; m162 *          1.548          0.000</span>
+<span class="co">#&gt; ----</span>
+<span class="co">#&gt;  *:mediator,-:joint mediator</span>
+<span class="co">#&gt;  Coefficients: estimated coefficients; P-Value 2:Tests of relationship with the Predictor</span></code></pre></div>
+<p>The results from “data.org.big” function are summarized by the “summary” function. When “only=TRUE”, it only shows the test results for selected covariates and mediators. The multicategorical mediator “m16” has 3 categories, and it has been binarized into two binary variables “m161” and “m162”, and they are selected as potential mediators together. We specify testtype=1 in the above example to identify covariates/mediators using full model. By default, testtype=2 is used that covariates/mediators are tested one by one in models with the predictor only. The following codes show the results when testtype is 2.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data.e1.<span class="dv">2</span>&lt;-<span class="kw">data.org.big</span>(<span class="dt">x=</span>m,<span class="dt">y=</span><span class="kw">data.frame</span>(y),<span class="dt">mediator=</span><span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(m),<span class="dt">pred=</span><span class="kw">data.frame</span>(pred))
+<span class="kw">summary</span>(data.e1.<span class="dv">2</span>,<span class="dt">only=</span><span class="ot">TRUE</span>)
+<span class="co">#&gt; Identified as mediators: </span>
+<span class="co">#&gt; [1] &quot;m11&quot;  &quot;m12&quot;  &quot;m161&quot; &quot;m162&quot;</span>
+<span class="co">#&gt; Selected as covariates: </span>
+<span class="co">#&gt; [1] &quot;m01&quot; &quot;m02&quot;</span>
+<span class="co">#&gt; Tests: </span>
+<span class="co">#&gt;       P-Value 1.y P-Value 2.pred</span>
+<span class="co">#&gt; m01         0.001          0.548</span>
+<span class="co">#&gt; m02         0.000          0.920</span>
+<span class="co">#&gt; m11 *       0.000          0.000</span>
+<span class="co">#&gt; m12 *       0.000          0.000</span>
+<span class="co">#&gt; m16 *       0.000          0.000</span>
+<span class="co">#&gt; ----</span>
+<span class="co">#&gt;  *:mediator,-:joint mediator</span>
+<span class="co">#&gt;  P-Value 1:univariate relationship test with the outcome;P-Value 2:Tests of relationship with the Predictor</span></code></pre></div>
+</div>
+<div id="survival-outcome" class="section level3">
+<h3>Survival outcome</h3>
+<p>The functions in mmabig can deal with binary, categorical, continuous, or time-to-event outcomes. If the outcome is time-to-event, it should be defined by the “Surv” function in the survival package. The following is an example.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lambda=<span class="dv">1</span><span class="op">/</span><span class="dv">500</span>
+survt=<span class="op">-</span><span class="kw">log</span>(<span class="kw">runif</span>(n))<span class="op">/</span>lambda<span class="op">/</span><span class="kw">exp</span>(lu)
+st=<span class="kw">round</span>(<span class="kw">runif</span>(n,<span class="dv">1</span>,<span class="dv">500</span>),<span class="dv">0</span>)
+time=<span class="kw">ifelse</span>(st<span class="op">+</span>survt<span class="op">&gt;</span><span class="dv">600</span>,<span class="dv">600</span>,st<span class="op">+</span>survt)<span class="op">-</span>st
+cen=<span class="kw">ifelse</span>(st<span class="op">+</span>survt<span class="op">&gt;</span><span class="dv">600</span>,<span class="dv">0</span>,<span class="dv">1</span>)
+y=<span class="kw">Surv</span>(time,cen)
+
+data.e3&lt;-<span class="kw">data.org.big</span>(<span class="dt">x=</span>m,<span class="dt">y=</span><span class="kw">data.frame</span>(y),<span class="dt">mediator=</span><span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(m),<span class="dt">pred=</span><span class="kw">data.frame</span>(pred),<span class="dt">testtype=</span><span class="dv">1</span>)
+<span class="kw">summary</span>(data.e3,<span class="dt">only=</span><span class="ot">TRUE</span>)
+<span class="co">#&gt; Identified as mediators: </span>
+<span class="co">#&gt; [1] &quot;m11&quot;  &quot;m12&quot;  &quot;m161&quot; &quot;m162&quot;</span>
+<span class="co">#&gt; Selected as covariates: </span>
+<span class="co">#&gt; [1] &quot;m01&quot; &quot;m02&quot;</span>
+<span class="co">#&gt; Tests: </span>
+<span class="co">#&gt;        Coefficients.y P-Value 2.pred</span>
+<span class="co">#&gt; m01             0.265          0.548</span>
+<span class="co">#&gt; m02             0.168          0.920</span>
+<span class="co">#&gt; m11 *           0.690          0.000</span>
+<span class="co">#&gt; m12 *           0.502          0.000</span>
+<span class="co">#&gt; m161 *          0.000          0.000</span>
+<span class="co">#&gt; m162 *          1.270          0.000</span>
+<span class="co">#&gt; ----</span>
+<span class="co">#&gt;  *:mediator,-:joint mediator</span>
+<span class="co">#&gt;  Coefficients: estimated coefficients; P-Value 2:Tests of relationship with the Predictor</span></code></pre></div>
+</div>
+<div id="multivariate-predictors" class="section level3">
+<h3>Multivariate predictors</h3>
+<p>In addition, the package can handle multivariate and multicategorical predictors. If the predictor is multicategorical of k levels, “data.org.big” first transforms the predictor to k-1 binary predictors. If a variable significantly relates with any of the k-1 predictors, the variable passes the first test described above. P-value 2 is shown for each predictor. In the following example, the predictor has three levels.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># multicategorical predictor</span>
+<span class="kw">set.seed</span>(<span class="dv">1</span>)
+n=<span class="dv">100</span>
+pred=<span class="kw">rmultinom</span>(<span class="dv">100</span>,<span class="dv">1</span>,<span class="kw">c</span>(<span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>))
+pred=pred[<span class="dv">1</span>,]<span class="op">*</span><span class="dv">0</span><span class="op">+</span>pred[<span class="dv">2</span>,]<span class="op">*</span><span class="dv">1</span><span class="op">+</span>pred[<span class="dv">3</span>,]<span class="op">*</span><span class="dv">2</span>
+m1=<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">10</span>),n,<span class="dv">10</span>)
+m2&lt;-<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">10</span>,<span class="dt">mean=</span>pred,<span class="dt">sd=</span><span class="dv">1</span>),n,<span class="dv">10</span>)
+m3.<span class="dv">1</span>=m2[,<span class="dv">6</span><span class="op">:</span><span class="dv">10</span>]
+m2=m2[,<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]
+m3=m3.<span class="dv">1</span>
+m3[m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="fl">0.1</span>]=<span class="dv">0</span>
+m3[<span class="fl">0.1</span><span class="op">&lt;</span>m3.<span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="dv">1</span>]=<span class="dv">1</span>
+m3[m3.<span class="dv">1</span><span class="op">&gt;</span><span class="dv">1</span>]=<span class="dv">2</span>
+m3&lt;-<span class="kw">apply</span>(m3,<span class="dv">2</span>,as.factor)
+m&lt;-<span class="kw">data.frame</span>(m1,m2,m3)
+<span class="kw">colnames</span>(m)&lt;-<span class="kw">c</span>(<span class="kw">paste</span>(<span class="st">&quot;m0&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">9</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>),<span class="kw">paste</span>(<span class="st">&quot;m&quot;</span>,<span class="dv">10</span><span class="op">:</span><span class="dv">20</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>))
+pred&lt;-<span class="kw">as.factor</span>(pred)
+<span class="co"># continuous y</span>
+lu&lt;-<span class="op">-</span><span class="fl">0.5363</span><span class="op">+</span><span class="kw">ifelse</span>(pred<span class="op">==</span><span class="st">&quot;1&quot;</span>,<span class="fl">0.3</span>,<span class="dv">0</span>)<span class="op">+</span><span class="kw">ifelse</span>(pred<span class="op">==</span><span class="st">&quot;2&quot;</span>,<span class="fl">0.7</span>,<span class="dv">0</span>)<span class="op">+</span><span class="fl">0.801</span><span class="op">*</span>m[,<span class="dv">1</span>]<span class="op">+</span><span class="fl">0.518</span><span class="op">*</span>m[,<span class="dv">2</span>]<span class="op">+</span>
+<span class="st">    </span><span class="fl">1.402</span><span class="op">*</span>m[,<span class="dv">11</span>]<span class="op">+</span><span class="fl">0.773</span><span class="op">*</span>m[,<span class="dv">12</span>]<span class="op">+</span><span class="kw">ifelse</span>(m[,<span class="dv">16</span>]<span class="op">==</span><span class="st">&quot;2&quot;</span>,<span class="fl">2.15</span>,<span class="dv">0</span>)<span class="op">+</span><span class="kw">ifelse</span>(m[,<span class="dv">16</span>]<span class="op">==</span><span class="st">&quot;1&quot;</span>,<span class="fl">0.201</span>,<span class="dv">0</span>)
+y&lt;-<span class="kw">rnorm</span>(n,lu,<span class="dv">1</span>)
+
+data.m.e1&lt;-<span class="kw">data.org.big</span>(<span class="dt">x=</span>m,<span class="dt">y=</span><span class="kw">data.frame</span>(y),<span class="dt">mediator=</span><span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(m),<span class="dt">pred=</span><span class="kw">data.frame</span>(pred),<span class="dt">testtype=</span><span class="dv">1</span>)
+<span class="kw">summary</span>(data.m.e1,<span class="dt">only=</span><span class="ot">TRUE</span>)
+<span class="co">#&gt; Identified as mediators: </span>
+<span class="co">#&gt; [1] &quot;m11&quot; &quot;m12&quot; &quot;m15&quot;</span>
+<span class="co">#&gt; Selected as covariates: </span>
+<span class="co">#&gt; [1] &quot;m01&quot; &quot;m02&quot; &quot;m16&quot;</span>
+<span class="co">#&gt; Tests: </span>
+<span class="co">#&gt;       Coefficients.y P-Value 2.pred1...i.1 P-Value 2.pred1...i.2</span>
+<span class="co">#&gt; m01            0.546                 0.721                 0.732</span>
+<span class="co">#&gt; m02            0.461                 0.157                 0.201</span>
+<span class="co">#&gt; m11 *          1.375                 0.000                 0.000</span>
+<span class="co">#&gt; m12 *          0.609                 0.000                 0.000</span>
+<span class="co">#&gt; m15 *          0.041                 0.000                 0.000</span>
+<span class="co">#&gt; ----</span>
+<span class="co">#&gt;  *:mediator,-:joint mediator</span>
+<span class="co">#&gt;  Coefficients: estimated coefficients; P-Value 2:Tests of relationship with the Predictor</span></code></pre></div>
+<p>In the following example, the predictor is bivariate.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># multivariate predictor</span>
+<span class="kw">set.seed</span>(<span class="dv">1</span>)
+n=<span class="dv">100</span>
+pred=<span class="kw">cbind</span>(<span class="kw">runif</span>(n,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="kw">rnorm</span>(n))
+m1=<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">10</span>),n,<span class="dv">10</span>)
+m2&lt;-<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">5</span>,<span class="dt">mean=</span><span class="fl">0.3</span><span class="op">*</span>pred[,<span class="dv">1</span>]<span class="op">+</span><span class="fl">0.4</span><span class="op">*</span>pred[,<span class="dv">2</span>],<span class="dt">sd=</span><span class="dv">1</span>),n,<span class="dv">5</span>)
+m3.<span class="dv">1</span>=<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">5</span>,<span class="dt">mean=</span><span class="fl">0.7</span><span class="op">*</span>pred[,<span class="dv">1</span>]<span class="op">+</span><span class="fl">0.8</span><span class="op">*</span>pred[,<span class="dv">2</span>],<span class="dt">sd=</span><span class="dv">1</span>),n,<span class="dv">5</span>)
+m3=m3.<span class="dv">1</span>
+m3[m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="dv">0</span>]=<span class="dv">0</span>
+m3[<span class="dv">0</span><span class="op">&lt;</span>m3.<span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="fl">1.28</span>]=<span class="dv">1</span>
+m3[m3.<span class="dv">1</span><span class="op">&gt;</span><span class="fl">1.28</span>]=<span class="dv">2</span>
+m3&lt;-<span class="kw">apply</span>(m3,<span class="dv">2</span>,as.factor)
+m&lt;-<span class="kw">data.frame</span>(m1,m2,m3)
+<span class="kw">colnames</span>(m)&lt;-<span class="kw">c</span>(<span class="kw">paste</span>(<span class="st">&quot;m0&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">9</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>),<span class="kw">paste</span>(<span class="st">&quot;m&quot;</span>,<span class="dv">10</span><span class="op">:</span><span class="dv">20</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>))
+<span class="kw">colnames</span>(pred)=<span class="kw">c</span>(<span class="st">&quot;x1&quot;</span>,<span class="st">&quot;x2&quot;</span>)
+<span class="co"># binary y</span>
+lu&lt;-<span class="op">-</span><span class="fl">0.6852</span><span class="op">+</span><span class="fl">0.3</span><span class="op">*</span>pred[,<span class="dv">1</span>]<span class="op">+</span><span class="fl">0.7</span><span class="op">*</span>pred[,<span class="dv">2</span>]<span class="op">+</span><span class="fl">0.801</span><span class="op">*</span>m[,<span class="dv">1</span>]<span class="op">+</span><span class="fl">0.518</span><span class="op">*</span>m[,<span class="dv">2</span>]<span class="op">+</span><span class="fl">1.402</span><span class="op">*</span>m[,<span class="dv">11</span>]<span class="op">+</span><span class="fl">0.773</span><span class="op">*</span>m[,<span class="dv">12</span>]<span class="op">+</span>
+<span class="st">     </span><span class="kw">ifelse</span>(m[,<span class="dv">16</span>]<span class="op">==</span><span class="st">&quot;2&quot;</span>,<span class="fl">2.15</span>,<span class="dv">0</span>)<span class="op">+</span><span class="kw">ifelse</span>(m[,<span class="dv">16</span>]<span class="op">==</span><span class="st">&quot;1&quot;</span>,<span class="fl">0.201</span>,<span class="dv">0</span>)
+y&lt;-<span class="kw">rbinom</span>(n,<span class="dv">1</span>,<span class="kw">exp</span>(lu)<span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(lu)))
+
+data.m.c.e2&lt;-<span class="kw">data.org.big</span>(<span class="dt">x=</span>m,<span class="dt">y=</span><span class="kw">data.frame</span>(y),<span class="dt">mediator=</span><span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(m),<span class="dt">pred=</span><span class="kw">data.frame</span>(pred),
+                          <span class="dt">testtype=</span><span class="dv">1</span>,<span class="dt">alpha1=</span><span class="fl">0.05</span>,<span class="dt">alpha2=</span><span class="fl">0.05</span>)
+<span class="kw">summary</span>(data.m.c.e2,<span class="dt">only=</span><span class="ot">TRUE</span>)
+<span class="co">#&gt; Identified as mediators: </span>
+<span class="co">#&gt; [1] &quot;m11&quot;  &quot;m12&quot;  &quot;m15&quot;  &quot;m161&quot; &quot;m162&quot;</span>
+<span class="co">#&gt; Selected as covariates: </span>
+<span class="co">#&gt; [1] &quot;m01&quot; &quot;m06&quot;</span>
+<span class="co">#&gt; Tests: </span>
+<span class="co">#&gt;        Coefficients.y P-Value 2.x1 P-Value 2.x2</span>
+<span class="co">#&gt; m01             0.187        0.607        0.533</span>
+<span class="co">#&gt; m06            -0.017        0.216        0.977</span>
+<span class="co">#&gt; m11 *           0.436        0.653        0.000</span>
+<span class="co">#&gt; m12 *           0.225        0.003        0.000</span>
+<span class="co">#&gt; m15 *           0.080        0.095        0.000</span>
+<span class="co">#&gt; m161 *          0.000        0.003        0.003</span>
+<span class="co">#&gt; m162 *          0.365        0.000        0.000</span>
+<span class="co">#&gt; ----</span>
+<span class="co">#&gt;  *:mediator,-:joint mediator</span>
+<span class="co">#&gt;  Coefficients: estimated coefficients; P-Value 2:Tests of relationship with the Predictor</span></code></pre></div>
+</div>
+<div id="multivariate-outcomes" class="section level3">
+<h3>Multivariate outcomes</h3>
+<p>Similarly, the package can deal with multivariate outcomes. The following code deals with multivariate predictors and multivariate responses. If the variable is significantly related with any one of the outcomes, it passes the second test described above. The results from “data.org.big” are summarized for each combination of the exposure-outcome relationship.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># multivariate predictor</span>
+<span class="kw">set.seed</span>(<span class="dv">1</span>)
+n=<span class="dv">100</span>
+pred=<span class="kw">cbind</span>(<span class="kw">runif</span>(n,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="kw">rnorm</span>(n))
+m1=<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">10</span>),n,<span class="dv">10</span>)
+m2&lt;-<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">5</span>,<span class="dt">mean=</span><span class="fl">0.3</span><span class="op">*</span>pred[,<span class="dv">1</span>]<span class="op">+</span><span class="fl">0.4</span><span class="op">*</span>pred[,<span class="dv">2</span>],<span class="dt">sd=</span><span class="dv">1</span>),n,<span class="dv">5</span>)
+m3.<span class="dv">1</span>=<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">5</span>,<span class="dt">mean=</span><span class="fl">0.7</span><span class="op">*</span>pred[,<span class="dv">1</span>]<span class="op">+</span><span class="fl">0.8</span><span class="op">*</span>pred[,<span class="dv">2</span>],<span class="dt">sd=</span><span class="dv">1</span>),n,<span class="dv">5</span>)
+m3=m3.<span class="dv">1</span>
+m3[m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="dv">0</span>]=<span class="dv">0</span>
+m3[<span class="dv">0</span><span class="op">&lt;</span>m3.<span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="fl">1.28</span>]=<span class="dv">1</span>
+m3[m3.<span class="dv">1</span><span class="op">&gt;</span><span class="fl">1.28</span>]=<span class="dv">2</span>
+m3&lt;-<span class="kw">apply</span>(m3,<span class="dv">2</span>,as.factor)
+m&lt;-<span class="kw">data.frame</span>(m1,m2,m3)
+<span class="kw">colnames</span>(m)&lt;-<span class="kw">c</span>(<span class="kw">paste</span>(<span class="st">&quot;m0&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">9</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>),<span class="kw">paste</span>(<span class="st">&quot;m&quot;</span>,<span class="dv">10</span><span class="op">:</span><span class="dv">20</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>))
+<span class="kw">colnames</span>(pred)=<span class="kw">c</span>(<span class="st">&quot;x1&quot;</span>,<span class="st">&quot;x2&quot;</span>)
+<span class="co">#multivariate responses</span>
+y&lt;-<span class="kw">cbind</span>(<span class="kw">rnorm</span>(n,lu,<span class="dv">1</span>),<span class="kw">rbinom</span>(n,<span class="dv">1</span>,<span class="kw">exp</span>(lu)<span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(lu))))
+<span class="kw">colnames</span>(y)=<span class="kw">c</span>(<span class="st">&quot;y1&quot;</span>,<span class="st">&quot;y2&quot;</span>)
+
+data.m.m.c.e2&lt;-<span class="kw">data.org.big</span>(<span class="dt">x=</span>m,<span class="dt">y=</span><span class="kw">data.frame</span>(y),<span class="dt">mediator=</span><span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(m),<span class="dt">pred=</span><span class="kw">data.frame</span>(pred),
+                            <span class="dt">testtype=</span><span class="dv">1</span>,<span class="dt">alpha1=</span><span class="fl">0.05</span>,<span class="dt">alpha2=</span><span class="fl">0.05</span>)
+<span class="kw">summary</span>(data.m.m.c.e2,<span class="dt">only=</span><span class="ot">TRUE</span>)
+<span class="co">#&gt; Identified as mediators: </span>
+<span class="co">#&gt;  [1] &quot;m11&quot;  &quot;m12&quot;  &quot;m15&quot;  &quot;m161&quot; &quot;m162&quot; &quot;m171&quot; &quot;m172&quot; &quot;m191&quot; &quot;m192&quot; &quot;m201&quot;</span>
+<span class="co">#&gt; [11] &quot;m202&quot;</span>
+<span class="co">#&gt; Selected as covariates: </span>
+<span class="co">#&gt; [1] &quot;m01&quot; &quot;m02&quot; &quot;m09&quot;</span>
+<span class="co">#&gt; Tests: </span>
+<span class="co">#&gt;        Coefficients.y1 Coefficients.y2 P-Value 2.x1 P-Value 2.x2</span>
+<span class="co">#&gt; m01              0.652           0.000        0.607        0.533</span>
+<span class="co">#&gt; m02              0.454           0.000        0.053        0.936</span>
+<span class="co">#&gt; m09              0.101           0.000        0.678        0.292</span>
+<span class="co">#&gt; m11 *            1.375           0.541        0.653        0.000</span>
+<span class="co">#&gt; m12 *            0.661           0.000        0.003        0.000</span>
+<span class="co">#&gt; m15 *            0.059           0.000        0.095        0.000</span>
+<span class="co">#&gt; m161 *           0.547           0.000        0.003        0.003</span>
+<span class="co">#&gt; m162 *           1.519           0.000        0.000        0.000</span>
+<span class="co">#&gt; m171 *           0.000           0.000        0.219        0.219</span>
+<span class="co">#&gt; m172 *           0.163           0.000        0.000        0.000</span>
+<span class="co">#&gt; m191 *           0.000           0.000        0.028        0.028</span>
+<span class="co">#&gt; m192 *           0.072           0.000        0.000        0.000</span>
+<span class="co">#&gt; m201 *           0.000           0.000        0.053        0.053</span>
+<span class="co">#&gt; m202 *           0.149           0.000        0.000        0.000</span>
+<span class="co">#&gt; ----</span>
+<span class="co">#&gt;  *:mediator,-:joint mediator</span>
+<span class="co">#&gt;  Coefficients: estimated coefficients; P-Value 2:Tests of relationship with the Predictor</span>
+
+data.m.m.c.e2.<span class="dv">2</span>&lt;-<span class="kw">data.org.big</span>(<span class="dt">x=</span>m,<span class="dt">y=</span><span class="kw">data.frame</span>(y),<span class="dt">mediator=</span><span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(m),<span class="dt">pred=</span><span class="kw">data.frame</span>(pred),
+                              <span class="dt">alpha1=</span><span class="fl">0.05</span>,<span class="dt">alpha2=</span><span class="fl">0.05</span>)
+<span class="kw">summary</span>(data.m.m.c.e2.<span class="dv">2</span>,<span class="dt">only=</span><span class="ot">TRUE</span>)
+<span class="co">#&gt; Identified as mediators: </span>
+<span class="co">#&gt; [1] &quot;m11&quot; &quot;m12&quot;</span>
+<span class="co">#&gt; Selected as covariates: </span>
+<span class="co">#&gt; [1] &quot;m01&quot; &quot;m09&quot;</span>
+<span class="co">#&gt; Tests: </span>
+<span class="co">#&gt;       P-Value 1.y1 P-Value 1.y2 P-Value 2.x1 P-Value 2.x2</span>
+<span class="co">#&gt; m01          0.000        0.053        0.607        0.533</span>
+<span class="co">#&gt; m09          0.043        0.993        0.678        0.292</span>
+<span class="co">#&gt; m11 *        0.000        0.000        0.653        0.000</span>
+<span class="co">#&gt; m12 *        0.003        0.148        0.003        0.000</span>
+<span class="co">#&gt; ----</span>
+<span class="co">#&gt;  *:mediator,-:joint mediator</span>
+<span class="co">#&gt;  P-Value 1:univariate relationship test with the outcome;P-Value 2:Tests of relationship with the Predictor</span></code></pre></div>
+</div>
+</div>
+<div id="third-variable-effect-analysis" class="section level2">
+<h2>Third-Variable Effect Analysis</h2>
+<p>Next, we use med.big function to estimate the TVE using the results from data.org.big function.</p>
+<div id="binary-predictor-and-continuous-outcome" class="section level3">
+<h3>Binary predictor and continuous outcome</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">med.e1&lt;-<span class="kw">med.big</span>(data.e1)</code></pre></div>
+<p>To show the results:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">med.e1
+<span class="co">#&gt; $y</span>
+<span class="co">#&gt;            pred</span>
+<span class="co">#&gt; de   0.01857787</span>
+<span class="co">#&gt; m161 0.00000000</span>
+<span class="co">#&gt; m162 0.98931416</span>
+<span class="co">#&gt; m11  1.21150833</span>
+<span class="co">#&gt; m12  0.52051526</span>
+<span class="co">#&gt; te   2.73991562</span></code></pre></div>
+</div>
+<div id="survival-outcome-1" class="section level3">
+<h3>Survival outcome</h3>
+<p>For survival outcome, the default option is to fit the final full model using Cox proportional hazard model.</p>
+</div>
+<div id="multivariate-outcomes-1" class="section level3">
+<h3>Multivariate outcomes</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">med.m.m.c.e2.<span class="dv">2</span>&lt;-<span class="kw">med.big</span>(data.m.m.c.e2.<span class="dv">2</span>)
+med.m.m.c.e2.<span class="dv">2</span>
+<span class="co">#&gt; $y1</span>
+<span class="co">#&gt;            x1        x2</span>
+<span class="co">#&gt; de  0.0000000 0.8146575</span>
+<span class="co">#&gt; m11 0.1218627 0.7372024</span>
+<span class="co">#&gt; m12 0.4478989 0.3595970</span>
+<span class="co">#&gt; te  0.5697616 1.9114569</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $y2</span>
+<span class="co">#&gt;              x1          x2</span>
+<span class="co">#&gt; de  0.000000000 0.000000000</span>
+<span class="co">#&gt; m11 0.063517400 0.384245356</span>
+<span class="co">#&gt; m12 0.003373375 0.002708325</span>
+<span class="co">#&gt; te  0.066890775 0.386953680</span></code></pre></div>
+</div>
+</div>
+<div id="combined-function-for-multiple-tve-analysis-with-big-data-sets" class="section level2">
+<h2>Combined function for multiple TVE analysis with big data sets</h2>
+<p>The “mma.big” is a function that automatically identify potential MCs, based on which to make statistical inference on the mediation effects for high-dimensional data sets. Bootstrap method is used to make inferences on the TVE. The summary function is used to summarize inference results. In the summary function, three different sets of confidence intervals are calculated: based on the normal assumption of bootstrap method (lwbd, upbd), on the quantiles (lwbd_q,upbd_q), and on the confidence ball (lwbd_b, upbd_b) <span class="citation">(Q. Yu and Li <a href="#ref-Yu2018c">2018</a>)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">1</span>)
+n=<span class="dv">100</span>
+pred=<span class="kw">rbinom</span>(n,<span class="dv">1</span>,<span class="fl">0.5</span>)
+m1=<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">10</span>),n,<span class="dv">10</span>)
+m2&lt;-<span class="kw">matrix</span>(<span class="kw">rnorm</span>(n<span class="op">*</span><span class="dv">10</span>,<span class="dt">mean=</span>pred,<span class="dt">sd=</span><span class="dv">1</span>),n,<span class="dv">10</span>)
+m3.<span class="dv">1</span>=m2[,<span class="dv">6</span><span class="op">:</span><span class="dv">10</span>]
+m3=m3.<span class="dv">1</span>
+m2=m2[,<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]
+m3[m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="fl">0.1</span>]=<span class="dv">0</span>
+m3[<span class="fl">0.1</span><span class="op">&lt;</span>m3.<span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>m3.<span class="dv">1</span><span class="op">&lt;=</span><span class="dv">1</span>]=<span class="dv">1</span>
+m3[m3.<span class="dv">1</span><span class="op">&gt;</span><span class="dv">1</span>]=<span class="dv">2</span>
+m3&lt;-<span class="kw">apply</span>(m3,<span class="dv">2</span>,as.factor)
+m&lt;-<span class="kw">data.frame</span>(m1,m2,m3)
+<span class="kw">colnames</span>(m)&lt;-<span class="kw">c</span>(<span class="kw">paste</span>(<span class="st">&quot;m0&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">9</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>),<span class="kw">paste</span>(<span class="st">&quot;m&quot;</span>,<span class="dv">10</span><span class="op">:</span><span class="dv">20</span>,<span class="dt">sep=</span><span class="st">&quot;&quot;</span>))
+
+lu&lt;-<span class="op">-</span><span class="fl">0.5363</span><span class="op">+</span><span class="fl">0.701</span><span class="op">*</span>pred<span class="op">+</span><span class="fl">0.801</span><span class="op">*</span>m[,<span class="dv">1</span>]<span class="op">+</span><span class="fl">0.518</span><span class="op">*</span>m[,<span class="dv">2</span>]<span class="op">+</span><span class="fl">1.402</span><span class="op">*</span>m[,<span class="dv">11</span>]<span class="op">+</span><span class="fl">0.773</span><span class="op">*</span>m[,<span class="dv">12</span>]<span class="op">+</span>
+<span class="st">    </span><span class="kw">ifelse</span>(m[,<span class="dv">16</span>]<span class="op">==</span><span class="st">&quot;2&quot;</span>,<span class="fl">2.15</span>,<span class="dv">0</span>)<span class="op">+</span><span class="kw">ifelse</span>(m[,<span class="dv">16</span>]<span class="op">==</span><span class="st">&quot;1&quot;</span>,<span class="fl">0.201</span>,<span class="dv">0</span>)
+y&lt;-<span class="kw">rnorm</span>(n,lu,<span class="dv">1</span>)
+
+mma.e1&lt;-<span class="kw">mma.big</span>(<span class="dt">x=</span>m,<span class="dt">y=</span><span class="kw">data.frame</span>(y),<span class="dt">mediator=</span><span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(m),<span class="dt">pred=</span><span class="kw">data.frame</span>(pred),
+                <span class="dt">alpha=</span><span class="dv">1</span>,<span class="dt">alpha1=</span><span class="fl">0.05</span>,<span class="dt">alpha2=</span><span class="fl">0.05</span>,<span class="dt">n2=</span><span class="dv">3</span>)  <span class="co">#use only the test results.</span>
+<span class="co">#&gt; [1] 1</span>
+<span class="co">#&gt; [1] 2</span>
+<span class="co">#&gt; [1] 3</span>
+<span class="kw">summary</span>(mma.e1)
+<span class="co">#&gt; </span>
+<span class="co">#&gt; The mediaiton effects:</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; For the response variable,y,</span>
+<span class="co">#&gt;        pred.de pred.m161 pred.m162 pred.m171 pred.m172 pred.m181 pred.m182</span>
+<span class="co">#&gt; est          0     0.018     0.748     0.000     0.069     0.008     0.000</span>
+<span class="co">#&gt; mean         0     0.000     0.898     0.005     0.048     0.005     0.018</span>
+<span class="co">#&gt; sd           0     0.000     0.264     0.010     0.041     0.013     0.032</span>
+<span class="co">#&gt; upbd_q       0     0.000     1.147     0.016     0.072     0.019     0.052</span>
+<span class="co">#&gt; lwbd_q       0     0.000     0.645    -0.002     0.004    -0.005     0.000</span>
+<span class="co">#&gt; upbd         0     0.018     1.265     0.020     0.151     0.035     0.062</span>
+<span class="co">#&gt; lwbd         0     0.018     0.231    -0.020    -0.012    -0.018    -0.062</span>
+<span class="co">#&gt; upbd_b       0     0.000     0.903     0.016     0.072     0.020     0.055</span>
+<span class="co">#&gt; lwbd_b       0     0.000     0.631     0.000     0.072     0.000     0.000</span>
+<span class="co">#&gt;        pred.m191 pred.m192 pred.m201 pred.m202 pred.m01 pred.m02 pred.m03</span>
+<span class="co">#&gt; est            0     0.000     0.000         0    0.112   -0.016        0</span>
+<span class="co">#&gt; mean           0    -0.003     0.019         0   -0.039    0.072        0</span>
+<span class="co">#&gt; sd             0     0.006     0.033         0    0.166    0.079        0</span>
+<span class="co">#&gt; upbd_q         0     0.000     0.055         0    0.133    0.154        0</span>
+<span class="co">#&gt; lwbd_q         0    -0.010    -0.002         0   -0.175    0.010        0</span>
+<span class="co">#&gt; upbd           0     0.012     0.065         0    0.438    0.139        0</span>
+<span class="co">#&gt; lwbd           0    -0.012    -0.065         0   -0.213   -0.170        0</span>
+<span class="co">#&gt; upbd_b         0     0.000     0.001         0    0.144    0.160        0</span>
+<span class="co">#&gt; lwbd_b         0     0.000    -0.002         0   -0.082    0.008        0</span>
+<span class="co">#&gt;        pred.m04 pred.m05 pred.m06 pred.m07 pred.m08 pred.m09 pred.m10</span>
+<span class="co">#&gt; est       0.000    0.000   -0.003    0.008    0.037    0.000    0.000</span>
+<span class="co">#&gt; mean      0.000    0.008    0.000    0.015    0.079    0.007    0.003</span>
+<span class="co">#&gt; sd        0.010    0.007    0.020    0.024    0.047    0.007    0.005</span>
+<span class="co">#&gt; upbd_q    0.011    0.013    0.018    0.041    0.128    0.014    0.009</span>
+<span class="co">#&gt; lwbd_q   -0.009    0.000   -0.020    0.000    0.039    0.002    0.000</span>
+<span class="co">#&gt; upbd      0.021    0.014    0.036    0.055    0.129    0.013    0.011</span>
+<span class="co">#&gt; lwbd     -0.020   -0.014   -0.042   -0.040   -0.056   -0.013   -0.011</span>
+<span class="co">#&gt; upbd_b    0.011    0.014    0.019    0.043    0.069    0.006    0.001</span>
+<span class="co">#&gt; lwbd_b   -0.001    0.000   -0.021    0.000    0.038    0.002    0.000</span>
+<span class="co">#&gt;        pred.m11 pred.m12 pred.m13 pred.m14 pred.m15 pred.te</span>
+<span class="co">#&gt; est       1.211    0.476        0    0.000        0   2.670</span>
+<span class="co">#&gt; mean      1.111    0.539        0    0.025        0   2.810</span>
+<span class="co">#&gt; sd        0.315    0.168        0    0.044        0   0.405</span>
+<span class="co">#&gt; upbd_q    1.448    0.712        0    0.072        0   3.243</span>
+<span class="co">#&gt; lwbd_q    0.908    0.399        0    0.000        0   2.571</span>
+<span class="co">#&gt; upbd      1.829    0.804        0    0.086        0   3.464</span>
+<span class="co">#&gt; lwbd      0.593    0.147        0   -0.086        0   1.875</span>
+<span class="co">#&gt; upbd_b    1.474    0.723        0    0.076        0   3.278</span>
+<span class="co">#&gt; lwbd_b    0.906    0.501        0    0.000        0   2.581</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>mma.big also accepts the organized dataset from data.org.big as the first argument.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mma.e1.<span class="dv">2</span>&lt;-<span class="kw">mma.big</span>(<span class="dt">data=</span>data.e1.<span class="dv">2</span>,<span class="dt">alpha1=</span><span class="fl">0.05</span>,<span class="dt">alpha2=</span><span class="fl">0.05</span>,<span class="dt">n2=</span><span class="dv">3</span>) 
+<span class="co">#&gt; [1] 1</span>
+<span class="co">#&gt; [1] 2</span>
+<span class="co">#&gt; [1] 3</span>
+<span class="kw">summary</span>(mma.e1.<span class="dv">2</span>,<span class="dt">RE=</span><span class="ot">TRUE</span>)
+<span class="co">#&gt; The relative effects:</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; For the response variable,y,</span>
+<span class="co">#&gt;        pred.de pred.m161 pred.m162 pred.m11 pred.m12 pred.te</span>
+<span class="co">#&gt; est      0.007     0.000     0.361    0.442    0.190       1</span>
+<span class="co">#&gt; mean     0.058     0.004     0.307    0.458    0.173       1</span>
+<span class="co">#&gt; sd       0.100     0.005     0.051    0.112    0.035       0</span>
+<span class="co">#&gt; upbd_q   0.165     0.009     0.355    0.551    0.198       1</span>
+<span class="co">#&gt; lwbd_q   0.000     0.000     0.259    0.342    0.137       1</span>
+<span class="co">#&gt; upbd     0.203     0.009     0.461    0.662    0.258       1</span>
+<span class="co">#&gt; lwbd    -0.189    -0.009     0.262    0.222    0.122       1</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div id="plots-of-the-fitted-mma-object-from-boot.med" class="section level3">
+<h3>Plots of the fitted mma object from boot.med</h3>
+<p>plot.mma.big() plots the marginal effect of the selected variable on the outcome, and the marginal effect of the predictor on the selected variable.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#plot(mma.e1.2,vari=&quot;m16&quot;)</span>
+<span class="kw">plot</span>(mma.e1.<span class="dv">2</span>,<span class="dt">vari=</span><span class="st">&quot;m11&quot;</span>)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>In the above figure, the upper panel shows the coefficient of “m11” when it is used to estimate y in an elasticnet regression with y being the outcome in bootstrap samples. We see that the coefficient is significantly positive. The lower panel shows when the exposure variable increases by 1 unit, the average change in “m11”. Again we see that the change in “m11” is positive. Therefore, there is a significant indirect effect (positive) through “m11”. As is shown by summary results, all confidence intervals for the indirect effect of “m11” are to the right of 0.</p>
+</div>
+<div id="survival-outcome-2" class="section level3">
+<h3>Survival outcome</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lambda=<span class="dv">1</span><span class="op">/</span><span class="dv">500</span>
+survt=<span class="op">-</span><span class="kw">log</span>(<span class="kw">runif</span>(n))<span class="op">/</span>lambda<span class="op">/</span><span class="kw">exp</span>(lu)
+st=<span class="kw">round</span>(<span class="kw">runif</span>(n,<span class="dv">1</span>,<span class="dv">500</span>),<span class="dv">0</span>)
+time=<span class="kw">ifelse</span>(st<span class="op">+</span>survt<span class="op">&gt;</span><span class="dv">600</span>,<span class="dv">600</span>,st<span class="op">+</span>survt)<span class="op">-</span>st
+cen=<span class="kw">ifelse</span>(st<span class="op">+</span>survt<span class="op">&gt;</span><span class="dv">600</span>,<span class="dv">0</span>,<span class="dv">1</span>)
+y=<span class="kw">Surv</span>(time,cen)
+
+mma.e3&lt;-<span class="kw">mma.big</span>(<span class="dt">x=</span>m,<span class="dt">y=</span><span class="kw">data.frame</span>(y),<span class="dt">mediator=</span><span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(m),<span class="dt">pred=</span><span class="kw">data.frame</span>(pred),<span class="dt">alpha=</span><span class="dv">1</span>,<span class="dt">alpha1=</span><span class="fl">0.05</span>,
+                <span class="dt">alpha2=</span><span class="fl">0.05</span>,<span class="dt">n2=</span><span class="dv">3</span>)  <span class="co">#use only the test results.</span>
+<span class="co">#&gt; [1] 1</span>
+<span class="co">#&gt; [1] 2</span>
+<span class="co">#&gt; [1] 3</span>
+mma.e3.<span class="dv">2</span>&lt;-<span class="kw">mma.big</span>(<span class="dt">data=</span>data.e3.<span class="dv">2</span>,<span class="dt">alpha1=</span><span class="fl">0.05</span>,<span class="dt">alpha2=</span><span class="fl">0.05</span>,<span class="dt">n2=</span><span class="dv">3</span>)  <span class="co">#use only the test results.</span>
+<span class="co">#&gt; [1] 1</span>
+<span class="co">#&gt; [1] 2</span>
+<span class="co">#&gt; [1] 3</span>
+<span class="kw">summary</span>(mma.e3)
+<span class="co">#&gt; </span>
+<span class="co">#&gt; The mediaiton effects:</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; For the response variable,y,</span>
+<span class="co">#&gt;        pred.de pred.m161 pred.m162 pred.m171 pred.m172 pred.m181 pred.m182</span>
+<span class="co">#&gt; est      0.000         0     0.659     0.000     0.000     0.008     0.022</span>
+<span class="co">#&gt; mean     0.053         0     0.753     0.003     0.004     0.004     0.012</span>
+<span class="co">#&gt; sd       0.092         0     0.431     0.008     0.007     0.007     0.021</span>
+<span class="co">#&gt; upbd_q   0.151         0     1.156     0.011     0.011     0.012     0.035</span>
+<span class="co">#&gt; lwbd_q   0.000         0     0.337    -0.002     0.000     0.000     0.000</span>
+<span class="co">#&gt; upbd     0.180         0     1.504     0.015     0.013     0.022     0.064</span>
+<span class="co">#&gt; lwbd    -0.180         0    -0.187    -0.015    -0.013    -0.005    -0.020</span>
+<span class="co">#&gt; upbd_b   0.000         0     0.770     0.000     0.011     0.000     0.037</span>
+<span class="co">#&gt; lwbd_b   0.000         0     0.314    -0.003     0.000     0.000     0.000</span>
+<span class="co">#&gt;        pred.m191 pred.m192 pred.m201 pred.m202 pred.m01 pred.m02 pred.m03</span>
+<span class="co">#&gt; est        0.000         0     0.041     0.000    0.052   -0.011        0</span>
+<span class="co">#&gt; mean       0.033         0     0.005     0.007    0.006    0.063        0</span>
+<span class="co">#&gt; sd         0.050         0     0.010     0.011    0.014    0.117        0</span>
+<span class="co">#&gt; upbd_q     0.086         0     0.016     0.019    0.020    0.187        0</span>
+<span class="co">#&gt; lwbd_q     0.000         0     0.000     0.000   -0.004   -0.027        0</span>
+<span class="co">#&gt; upbd       0.097         0     0.060     0.022    0.079    0.219        0</span>
+<span class="co">#&gt; lwbd      -0.097         0     0.023    -0.022    0.026   -0.241        0</span>
+<span class="co">#&gt; upbd_b     0.009         0     0.016     0.020    0.000    0.023        0</span>
+<span class="co">#&gt; lwbd_b     0.000         0     0.000     0.000   -0.004   -0.029        0</span>
+<span class="co">#&gt;        pred.m04 pred.m05 pred.m06 pred.m07 pred.m08 pred.m09 pred.m10</span>
+<span class="co">#&gt; est       0.011    0.000    0.000    0.000    0.000   -0.004    0.000</span>
+<span class="co">#&gt; mean     -0.002    0.005    0.000    0.004    0.003    0.003    0.004</span>
+<span class="co">#&gt; sd        0.010    0.007    0.006    0.007    0.015    0.004    0.026</span>
+<span class="co">#&gt; upbd_q    0.007    0.011    0.006    0.011    0.018    0.008    0.032</span>
+<span class="co">#&gt; lwbd_q   -0.013   -0.002   -0.005    0.000   -0.009    0.000   -0.014</span>
+<span class="co">#&gt; upbd      0.031    0.014    0.012    0.013    0.029    0.005    0.051</span>
+<span class="co">#&gt; lwbd     -0.009   -0.014   -0.012   -0.013   -0.029   -0.013   -0.051</span>
+<span class="co">#&gt; upbd_b    0.007    0.011    0.000    0.012    0.019    0.008   -0.006</span>
+<span class="co">#&gt; lwbd_b   -0.001    0.008   -0.005    0.000    0.000    0.000   -0.015</span>
+<span class="co">#&gt;        pred.m11 pred.m12 pred.m13 pred.m14 pred.m15 pred.te</span>
+<span class="co">#&gt; est       0.950    0.552    0.026    0.131    0.029   2.466</span>
+<span class="co">#&gt; mean      0.896    0.638    0.000    0.072    0.121   2.688</span>
+<span class="co">#&gt; sd        0.475    0.214    0.000    0.062    0.108   1.452</span>
+<span class="co">#&gt; upbd_q    1.345    0.866    0.000    0.111    0.205   4.111</span>
+<span class="co">#&gt; lwbd_q    0.443    0.491    0.000    0.005    0.008   1.357</span>
+<span class="co">#&gt; upbd      1.880    0.971    0.026    0.253    0.241   5.313</span>
+<span class="co">#&gt; lwbd      0.019    0.133    0.026    0.008   -0.182  -0.380</span>
+<span class="co">#&gt; upbd_b    0.901    0.543    0.000    0.112    0.208   2.580</span>
+<span class="co">#&gt; lwbd_b    0.419    0.489    0.000    0.000    0.000   1.292</span>
+<span class="kw">summary</span>(mma.e3.<span class="dv">2</span>,<span class="dt">RE=</span><span class="ot">TRUE</span>,<span class="dt">quant=</span><span class="ot">FALSE</span>)
+<span class="co">#&gt; The relative effects:</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; For the response variable,y,</span>
+<span class="co">#&gt;        pred.de pred.m161 pred.m162 pred.m171 pred.m172 pred.m11 pred.m12</span>
+<span class="co">#&gt; est          0     0.000     0.361     0.000     0.018    0.349    0.272</span>
+<span class="co">#&gt; mean         0     0.006     0.377     0.013     0.043    0.341    0.221</span>
+<span class="co">#&gt; sd           0     0.018     0.020     0.014     0.007    0.120    0.105</span>
+<span class="co">#&gt; upbd_q       0     0.025     0.394     0.026     0.051    0.432    0.329</span>
+<span class="co">#&gt; lwbd_q       0    -0.008     0.356     0.001     0.038    0.215    0.134</span>
+<span class="co">#&gt; upbd         0     0.035     0.400     0.027     0.032    0.583    0.478</span>
+<span class="co">#&gt; lwbd         0    -0.035     0.321    -0.027     0.004    0.114    0.067</span>
+<span class="co">#&gt;        pred.te</span>
+<span class="co">#&gt; est          1</span>
+<span class="co">#&gt; mean         1</span>
+<span class="co">#&gt; sd           0</span>
+<span class="co">#&gt; upbd_q       1</span>
+<span class="co">#&gt; lwbd_q       1</span>
+<span class="co">#&gt; upbd         1</span>
+<span class="co">#&gt; lwbd         1</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><img src="data:image/png;base64,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" /></p>
+<p>We can also plot the selected variables on the survival outcome.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(mma.e3.<span class="dv">2</span>,<span class="dt">vari=</span><span class="st">&quot;m16&quot;</span>)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(mma.e3.<span class="dv">2</span>,<span class="dt">vari=</span><span class="st">&quot;m11&quot;</span>)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-Yu2018b">
+<p>Li, Bin, Qingzhao Yu, L. Zhang, and M. Hsieh. 2018. “Regularized Multiple Mediation Analysis for Big Data Sets.” <em>Submitted Manuscript</em>.</p>
+</div>
+<div id="ref-Yu2017a">
+<p>Yu, Qingzhao, and Bin Li. 2017. “Mma: An R Package for Mediation Analysis with Multiple Mediators.” <em>Journal of Open Research Software</em> 5 (1): 11. doi:<a href="https://doi.org/10.5334/jors.160">10.5334/jors.160</a>.</p>
+</div>
+<div id="ref-Yu2018c">
+<p>Yu, Qingzhao, and Bin Li. 2018. “A Multivariate Multiple Mediation Analysis with an Application to Explore Racial and Ethnic Disparities in Obesity.” <em>Submitted Manuscript</em>.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

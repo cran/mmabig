@@ -2,7 +2,7 @@
 data.org.big<-function(x,y,pred,mediator=NULL,contmed=NULL,binmed=NULL,binref=NULL,catmed=NULL,
                        catref=NULL,jointm=NULL, 
                        family1=as.list(rep(NA,ncol(data.frame(y)))),
-                       predref=NULL,alpha=1,alpha1=0.01,alpha2=0.01,testtype=2, w=NULL)
+                       predref=NULL,alpha=1,alpha1=0.01,alpha2=0.01,testtype=2, w=NULL,lambda=exp(seq(log(0.001), log(5), length.out=15)))
 {cattobin<-function(x,cat1,cat2=rep(1,length(cat1)))
 { ad1<-function(vec)
 {vec1<-vec[-1]
@@ -229,7 +229,7 @@ for (j in 1:length(y_type))
  else
    w1<-w[nonmissing]
  x.temp<-model.matrix(y.all~.,x.all1)
- fit.all<-suppressWarnings(cv.glmnet(x.temp,y.all,weights=w1,family=family1[[j]],alpha=alpha))
+ fit.all<-suppressWarnings(cv.glmnet(x.temp,y.all,weights=w1,family=family1[[j]],alpha=alpha,lambda=lambda))
  if(y_type[j]!=4)
    fullmodel1<-cbind(fullmodel1,coef(fit.all)[-(1:2),])
  else     fullmodel1<-cbind(fullmodel1,coef(fit.all)[-1,]) # survival outcome does not fit an intercept
@@ -257,10 +257,13 @@ for (j in 1:ncol(y2))
    temp.fullmodel1<-coxph(y2[,j]~.,data=pred,weights=w)
   else
    temp.fullmodel1<-glm(y2[,j]~.,data=pred,family=family1[[j]],weights=w) 
-  temp.type3<-Anova(temp.fullmodel1,type="III")
+  temp.type3<-summary(temp.fullmodel1)$coefficients#Anova(temp.fullmodel1,type="III")
   for (k in 1:ncol(pred))
-   P1[grep(prednames[k],xname),j]<-temp.type3[rownames(temp.type3)==prednames[k],3]
- }
+    if(y_type[j]==4)
+      P1[grep(prednames[k],xname),j]<-temp.type3[grep(prednames[1],rownames(temp.type3)),5]
+    else
+      P1[grep(prednames[k],xname),j]<-temp.type3[grep(prednames[1],rownames(temp.type3)),4]
+}
 
  if(!is.null(contmed))
   for (i in 1:length(contmed))
@@ -273,8 +276,11 @@ for (j in 1:ncol(y2))
      temp.fullmodel1<-coxph(y2[,j]~.,data=data.frame(temp.data),weights=w)
     else
      temp.fullmodel1<-glm(y2[,j]~.,data=data.frame(temp.data),family=family1[[j]],weights=w) 
-    temp.type3<-Anova(temp.fullmodel1,type="III")
-    temp.p1<-temp.type3[rownames(temp.type3)==xname[contmed[i]],3]
+    temp.type3<-summary(temp.fullmodel1)$coefficients
+    if(y_type[j]==4)
+      temp.p1<-temp.type3[rownames(temp.type3)==xname[contmed[i]],5]
+    else
+      temp.p1<-temp.type3[rownames(temp.type3)==xname[contmed[i]],4]
     P1[grep(xname[contmed[i]],xname),j]<-temp.p1
     covr.cont[i]<-ifelse(temp.p1<alpha1,T,covr.cont[i])
    }
@@ -290,8 +296,11 @@ for (j in 1:ncol(y2))
      temp.fullmodel1<-coxph(y2[,j]~.,data=data.frame(temp.data),weights=w)
     else
      temp.fullmodel1<-glm(y2[,j]~.,data=data.frame(temp.data),family=family1[[j]],weights=w) 
-   temp.type3<-Anova(temp.fullmodel1,type="III")
-   temp.p1<-temp.type3[rownames(temp.type3)==xname[binmed[i]],3]
+   temp.type3<-summary(temp.fullmodel1)$coefficients
+   if(y_type[j]==4)
+     temp.p1<-temp.type3[rownames(temp.type3)==xname[binmed[i]],5]
+   else
+     temp.p1<-temp.type3[rownames(temp.type3)==xname[binmed[i]],4]
    P1[grep(xname[binmed[i]],xname),j]<-temp.p1
    covr.bin[i]<-ifelse(temp.p1<alpha1,T,covr.bin[i])
   }
@@ -307,10 +316,13 @@ for (j in 1:ncol(y2))
       temp.fullmodel1<-coxph(y2[,j]~.,data=data.frame(temp.data),weights=w)
      else
       temp.fullmodel1<-glm(y2[,j]~.,data=data.frame(temp.data),family=family1[[j]],weights=w) #use type three error to test the full model
-    temp.type3<-Anova(temp.fullmodel1,type="III")
-    temp.p1<-temp.type3[rownames(temp.type3)==xname[catmed[i]],3]
-    P1[grep(xname[catmed[i]],xname),j]<-temp.p1
-    covr.cat[i]<-ifelse(temp.p1<alpha1,T,covr.cat[i])
+    temp.type3<-summary(temp.fullmodel1)$coefficients
+    if(y_type[j]==4)
+      temp.p1<-temp.type3[grep(xname[catmed[i]],rownames(temp.type3)),5]
+    else
+      temp.p1<-temp.type3[grep(xname[catmed[i]],rownames(temp.type3)),4]
+    P1[grep(xname[catmed[i]],xname),j]<-min(temp.p1)
+    covr.cat[i]<-ifelse(min(temp.p1)<alpha1,T,covr.cat[i])
    }
 } 
 
@@ -567,7 +579,7 @@ print.summary.med_iden.big<-function(x,...)  #version 6: changed typos in the fu
 med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, contm = data$contm, 
                         catm = data$catm, jointm = data$jointm, allm = c(contm, binm, unique(unlist(catm)[-1])), 
                         margin=1,df=1,family1=data$family1,refy=rep(NA,ncol(y)),binpred=data$binpred,type=NULL, 
-                        w=NULL,alpha=1)
+                        w=NULL,alpha=1,lambda=exp(seq(log(0.001), log(5), length.out=15)))
   {if (is.null(c(binm,contm,catm)))
     stop("Error: no potential mediator is specified")
    
@@ -633,22 +645,33 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
     
     exp.m.given.x<-function(x,dirx,binm,contm=NULL,df,w) #give the model and residual of m given x
     {models<-NULL
-    res<-NULL
-    if(df>1)
-    {z<-NULL
-     for(i in 1:ncol(dirx))
-      z<-cbind(z,ns(dirx[,i],df=df))}
-    else
-      z<-dirx
+     res<-NULL
+     prednames=names(dirx)
+     if (ncol(dirx)==1)
+       expr=paste("ns(",prednames,",df=",df,")",sep="")
+     else
+       {expr=paste("ns(",prednames[1],",df=",df, ")",sep="")
+        for (i in 2:ncol(dirx))
+          expr=paste(expr,paste("ns(",prednames[i],",df=",df,")",sep=""),sep="+")
+       }
     j<-1
+    forml=paste("y~",expr,sep="")
     if(!is.null(binm))
     {for(i in binm)
-     {models[[j]]<-glm(x[,i]~.,data=data.frame(z),family=binomial(link = "logit"),weights=w)
-     #res<-cbind(res,x[,i]-predict(models[[j]],type = "response",newdata=data.frame(z=z)))
+     {y=x[,i]
+      if(is.null(w))
+        models[[j]]<-glm(forml,data=data.frame(y,dirx),family=binomial(link = "logit"))
+      else
+        models[[j]]<-glm(forml,data=data.frame(y,dirx,w),family=binomial(link = "logit"),weights=w)
+      #res<-cbind(res,x[,i]-predict(models[[j]],type = "response",newdata=data.frame(z=z)))
       j<-j+1}
     }
     for (i in contm)
-    {models[[j]]<-glm(x[,i]~.,data=data.frame(z),family=gaussian(link="identity"),weights=w)
+    {y=x[,i]
+    if(is.null(w))
+      models[[j]]<-glm(forml,data=data.frame(y,dirx),family=gaussian(link="identity"))
+    else
+      models[[j]]<-glm(forml,data=data.frame(y,dirx,w),family=gaussian(link="identity"),weights=w)
     #res<-cbind(res,models[[j]]$res)
      j<-j+1
     }
@@ -658,19 +681,12 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
     
     dM<-function(distmgivenx,dirx,binm1,contm,df,margin,m.names)  
     {means<-NULL
-     if(df>1)
-     {z<-NULL
-      for(i in 1:ncol(dirx))
-       z<-cbind(z,ns(dirx[,i],df=df))}
-      else
-       z<-dirx
-
     if(!is.null(binm1))
       for (i in 1:length(binm1))
-        means<-cbind(means,predict(distmgivenx$models[[i]],type = "response",newdata=data.frame(z)))
+        means<-cbind(means,predict(distmgivenx$models[[i]],type = "response",newdata=data.frame(dirx)))
     if(!is.null(contm))
       for (i in (length(binm1)+1):length(c(binm1,contm)))
-        means<-cbind(means,predict(distmgivenx$models[[i]],newdata=data.frame(z)))
+        means<-cbind(means,predict(distmgivenx$models[[i]],newdata=data.frame(dirx)))
     
     dm<-vector("list", ncol(dirx))
     names(dm)<-colnames(dirx)
@@ -678,20 +694,13 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
      dirx1<-dirx
      dirx1[,j]=dirx[,j]+margin
      
-     if(df>1)
-     {z<-NULL
-      for(i in 1:ncol(dirx))
-       z<-cbind(z,ns(dirx1[,i],df=df))}
-     else
-       z<-dirx1
-     
      means1<-NULL
      if(!is.null(binm1))
        for (i in 1:length(binm1))
-         means1<-cbind(means1,predict(distmgivenx$models[[i]],type = "response",newdata=data.frame(z)))
+         means1<-cbind(means1,predict(distmgivenx$models[[i]],type = "response",newdata=data.frame(dirx1)))
      if(!is.null(contm))
        for (i in (length(binm1)+1):length(c(binm1,contm)))
-         means1<-cbind(means1,predict(distmgivenx$models[[i]],newdata=data.frame(z)))
+         means1<-cbind(means1,predict(distmgivenx$models[[i]],newdata=data.frame(dirx1)))
      dm[[j]]<-means1-means
      colnames(dm[[j]])=m.names
     } 
@@ -722,7 +731,7 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
   {vec<-rep(F,length(vec1))
     for (i in 1:length(vec2))
      vec= vec | vec1==vec2[i]
-  }
+    }
     
     if(is.null(catm))
       multi=jointm
@@ -759,17 +768,23 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
     if(binpred){
       dm<-dM.bin(pred,x,binm1, contm, m.names,w)
       diag.temp<-abs(dm)
+#      diag.temp1<-diag.temp
       distmgivenx=NULL
     }
     else{
      distmgivenx<-exp.m.given.x(x,pred,binm1,contm,df,w)
      dm<-dM(distmgivenx,pred,binm1,contm,df,margin,m.names) #draw ms conditional on x
      diag.temp<-NULL
+#     diag.temp1<-NULL
      for (k in 1:ncol(pred))
        if(is.null(w))
-         diag.temp<-rbind(diag.temp, apply(dm[[k]],2,mean))
+         {diag.temp<-rbind(diag.temp, apply(dm[[k]],2,mean))
+#         diag.temp1<-rbind(diag.temp1, apply(abs(dm[[k]]),2,mean))
+          }
        else
-         diag.temp<-rbind(diag.temp, apply(dm[[k]],2,weighted.mean,w))
+         {diag.temp<-rbind(diag.temp, apply(dm[[k]],2,weighted.mean,w))
+#         diag.temp1<-rbind(diag.temp1, apply(abs(dm[[k]]),2,weighted.mean,w))
+         }
 #     diag.temp=abs(diag.temp)
     }
     diag1<-rep(1,ncol(x))
@@ -785,9 +800,9 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
 
     for(d in 1:ncol(y)){
       if(is.null(w))
-         full.model[[d]]<-suppressWarnings(cv.glmnet(x=data.matrix(x2), y=y[,d],standardize=F,family=data$family1[[d]],alpha=alpha))
+         full.model[[d]]<-suppressWarnings(cv.glmnet(x=data.matrix(x2), y=y[,d],standardize=F,family=data$family1[[d]],alpha=alpha,lambda=lambda))
       else
-         full.model[[d]]<-suppressWarnings(cv.glmnet(x=data.matrix(x2), y=y[,d],standardize=F,family=data$family1[[d]],weights=w,alpha=alpha))
+         full.model[[d]]<-suppressWarnings(cv.glmnet(x=data.matrix(x2), y=y[,d],standardize=F,family=data$family1[[d]],weights=w,alpha=alpha,lambda=lambda))
       if(data$y_type[d]!=4)
           coef.temp<-coef(full.model[[d]])[-1,]
        else  coef.temp<-coef(full.model[[d]])[1:length(coef(full.model[[d]])),]  #survival outcome does not fit an intercept
@@ -911,7 +926,7 @@ if(!is.null(binm1))
 mma.big<-function(data=NULL,x=data$x, y=data$y,pred=data$dirx, mediator=NULL, binm=data$binm,contm=data$contm,catm=data$catm,
                   jointm=data$jointm,margin=1,df=1,binref=NULL,catref=NULL,predref=NULL,alpha=1,alpha1=0.01,alpha2=0.01,
                   family1=data$family1,n2=50,w=rep(1,nrow(x)),
-                  refy=NULL,pred.new=NULL,binpred=data$binpred,type=NULL,w.new=NULL)
+                  refy=NULL,pred.new=NULL,binpred=data$binpred,type=NULL,w.new=NULL,lambda=exp(seq(log(0.001), log(5), length.out=15)))
 {if(is.null(data)){
   mediator=unique(c(contm,mediator,binm,catm,jointm))
   data=data.org.big(x,y,pred,mediator,contmed=contm,binmed=binm,binref=binref,catmed=catm,
@@ -974,7 +989,7 @@ names(dm)=colnames(pred)
 names(coef)=colnames(y)
 bootresults=coef
 
-results<-med.big(data=data,margin=margin,df=df,type=type,w=w,alpha=alpha)
+results<-med.big(data=data,margin=margin,df=df,type=type,w=w,alpha=alpha,lambda=lambda)
 
 for (i in 1:n2)
 {boots<-sample(1:nrow(x),replace=T, prob=w)
@@ -986,7 +1001,7 @@ for (i in 1:n2)
    w1=NULL
  else
    w1=w[boots]
- temp<-med.big(data=data1,margin=margin,df=df,type=type,w=w,alpha=alpha) #added to the new codel, change the seed to make different results
+ temp<-med.big(data=data1,margin=margin,df=df,type=type,w=w,alpha=alpha,lambda=lambda) #added to the new codel, change the seed to make different results
  temp1<-print(temp,pred.new=pred.new,w.new=w.new,print=F)
  for (k in 1:K)
   dm[[k]]<-rbind(dm[[k]],temp1$dm[[k]])
@@ -1190,7 +1205,7 @@ plot.mma.big<-function(x,vari,...)
     par(fig=c((d-1)/D,d/D,0.5,1))
   else
     par(fig=c((d-1)/D,d/D,0.5,1),new=T)
-  boxplot(coef2,names=mnames[vari],main=ynames[d],ylab="coef for M") 
+  boxplot(coef2,names=mnames[vari],main=ynames[d],ylab=paste("coef for", mnames[vari])) 
   coef3<-cbind(coef3,coef2)
  }
  dm=vector("list",K)  
@@ -1274,6 +1289,72 @@ invisible(me)
 }
 
 
+joint.effect<-function(object,vari,alpha=0.05)
+{
+a1<-alpha/2
+a2<-1-a1
+b1<-qnorm(a1)
+b2<-qnorm(a2)
+x<-object
+ny<-ncol(x$data$y)
+nx<-ncol(x$data$dirx)
+temp1<-x$bootresults
+temp.0<-print(x$results,print=F)
+temp2<-temp1
+for(l in 1:ny)
+  temp2[[l]]=temp2[[l]]%*%diag(1/temp2[[l]][nrow(temp2[[l]]),])
+temp<-vector("list",ny)
+names(temp)<-colnames(x$data$y)
+temp.4<-vector("list",ny)                #save relative effects
+names(temp.4)<-colnames(x$data$y)
+
+for(l in 1:ny){
+  temp.namea=rownames(temp1[[l]])
+  temp.a=unique(unlist(lapply(vari,grep,temp.namea)))
+  if (length(temp.a)==1)
+    return("Please select multiple mediators.")
+  else
+    temp.1<-apply(temp1[[l]][temp.a,],2,sum)
+  temp.1<-matrix(temp.1,nrow=nx)
+  temp.nameb=rownames(temp.0$results[[l]])
+  temp.b=unique(unlist(lapply(vari,grep,temp.nameb)))
+  temp[[l]]<-rbind(est=apply(as.matrix(temp.0$results[[l]][temp.b,]),2,sum),
+                   mean=apply(temp.1,1,mean,na.rm=T),
+                   sd=apply(temp.1,1,sd,na.rm=T),
+                   upbd_q=apply(temp.1,1,quantile,a2,na.rm=T), 
+                   lwbd_q=apply(temp.1,1,quantile,a1,na.rm=T))
+  temp[[l]]=rbind(temp[[l]],upbd=temp[[l]][1,]+b2*temp[[l]][3,])
+  temp[[l]]=rbind(temp[[l]],lwbd=temp[[l]][1,]+b1*temp[[l]][3,])
+  colnames(temp[[l]])=colnames(x$data$dirx)
+#  temp.3=temp.0$results[[l]]
+#  temp.2=bound.ball(temp.3,temp1[[l]],alpha)
+#  temp[[l]]=rbind(temp[[l]],upbd_b=temp.2[,1])
+#  temp[[l]]=rbind(temp[[l]],lwbd_b=temp.2[,2])
+#  colnames(temp[[l]])=paste(rep(colnames(x$data$dirx),each=nrow(temp1[[l]])),rownames(temp1[[l]]),sep=".")
+}
+
+for(l in 1:ny){
+  if (length(temp.a)==1)
+    temp.1=temp2[[l]][temp.a,]
+  else
+    temp.1<-apply(temp2[[l]][temp.a,],2,sum)
+  temp.1<-matrix(temp.1,nrow=nx)
+  if(nx>1)
+    est=apply((temp.0$results[[l]]%*%diag(1/temp.0$results[[l]][nrow(temp.0$results[[l]]),]))[temp.b,],2,sum)
+  else
+    est=sum(temp.0$results[[l]][temp.b,1]/temp.0$results[[l]][nrow(temp.0$results[[l]]),1])
+  temp.4[[l]]<-rbind(est=est,
+                     mean=apply(temp.1,1,mean,na.rm=T),
+                     sd=apply(temp.1,1,sd,na.rm=T),
+                     upbd_q=apply(temp.1,1,quantile,a2,na.rm=T), 
+                     lwbd_q=apply(temp.1,1,quantile,a1,na.rm=T))
+  temp.4[[l]]=rbind(temp.4[[l]],upbd=temp.4[[l]][1,]+b2*temp.4[[l]][3,])
+  temp.4[[l]]=rbind(temp.4[[l]],lwbd=temp.4[[l]][1,]+b1*temp.4[[l]][3,])
+  colnames(temp.4[[l]])=colnames(x$data$dirx)
+}
+#cat("The joint mediation effect and relative effect of")
+list(variables=temp.namea[temp.a],effect=temp,relative.effect=temp.4)
+}
 
 
 
