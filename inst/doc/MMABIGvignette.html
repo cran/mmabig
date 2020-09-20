@@ -12,7 +12,7 @@
 
 <meta name="author" content="Qingzhao Yu and Lin Zhu" />
 
-<meta name="date" content="2019-04-03" />
+<meta name="date" content="2020-09-19" />
 
 <title>Examples for Big Data Mediation Analysis</title>
 
@@ -95,7 +95,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Examples for Big Data Mediation Analysis</h1>
 <h4 class="author">Qingzhao Yu and Lin Zhu</h4>
-<h4 class="date">2019-04-03</h4>
+<h4 class="date">2020-09-19</h4>
 
 
 
@@ -384,6 +384,8 @@ med.m.m.c.e2.<span class="dv">2</span>
 <span class="co">#&gt; m11 0.063517400 0.384245356</span>
 <span class="co">#&gt; m12 0.003373375 0.002708325</span>
 <span class="co">#&gt; te  0.066890775 0.386953680</span></code></pre></div>
+<p>Finally, in the mmabig package, the relationship between third variables and the exposure variable(s) are fitted through generalized smoothing splines to allow the fit of potential nonlinear relationships. In the package, the ns() function is used to generate the B-spline basis matrix for a natural cubic spline. The argument “df” in the med.big function is used to assign the degrees of freedom for the spline basis matrix. By default, the degree of freedom is 1, which is to fit a linear relationship.</p>
+<p>We also allow generalized linear models to fit the relationship between outcomes and all predictors in the full model. The argument used in the med.big function to define the generalized linear model is “family1”. It is a list with the ith item defines the conditional distribution of the ith outcome, y[,i] given the predictors, and the linkage function that links the mean of the outcome with the system component if generalized linear model is used as the final full model. The default value of “family1”&quot; is gaussian(link=“identity”) for continuous outcomes, and binomial(link = “logit”) for binary ones.</p>
 </div>
 </div>
 <div id="combined-function-for-multiple-tve-analysis-with-big-data-sets" class="section level2">

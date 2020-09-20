@@ -750,7 +750,7 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
     else  tempm<-NULL
     allm<-unique(c(contm,binm,unlist(tempm)))
     
-    nonmissing<-apply(cbind(y,x[,listm$single],dirx),1,anymissing)
+    nonmissing<-apply(cbind(y,x,dirx),1,anymissing)
     x<-x[nonmissing,]
     y<-data.frame(y[nonmissing,])
     colnames(y)<-ynames

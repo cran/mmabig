@@ -225,6 +225,9 @@ colnames(pred.new)=c("x1","x2")
 print(med.m.m.c.e2.2,pred.new=pred.new)
 ```
 
+Finally, in the mmabig package, the relationship between third variables and the exposure variable(s) are fitted through generalized smoothing splines to allow the fit of potential nonlinear relationships. In the package, the ns() function is used to generate the B-spline basis matrix for a natural cubic spline. The argument "df" in the med.big function is used to assign the degrees of freedom for the spline basis matrix. By default, the degree of freedom is 1, which is to fit a linear relationship. 
+
+We also allow generalized linear models to fit the relationship between outcomes and all predictors in the full model. The argument used in the med.big function to define the generalized linear model is "family1". It is a list with the ith item defines the conditional distribution of the ith outcome, y[,i] given the predictors, and the linkage function that links the mean of the outcome with the system component if generalized linear model is used as the final full model. The default value of "family1"" is gaussian(link="identity") for continuous outcomes, and binomial(link = "logit") for binary ones.
 
 ## Combined function for multiple TVE analysis with big data sets
 The "mma.big" is a function that automatically identify potential MCs, based on which to make statistical inference on the mediation effects for high-dimensional data sets. Bootstrap method is used to make inferences on the TVE. The summary function is used to summarize inference results. In the summary function, three different sets of confidence intervals are calculated: based on the normal assumption of bootstrap method (lwbd, upbd), on the quantiles (lwbd_q,upbd_q), and on the confidence ball (lwbd_b, upbd_b) [@Yu2018c].

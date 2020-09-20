@@ -345,15 +345,15 @@ data.m.e2.2<-data.org.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame
 summary(data.m.e2.2,only=TRUE)
 med.m.e2<-med.big(data.m.e2)
 med.m.e2
-med.m.e2.2<-med.big(data.m.e2.2)
-med.m.e2.2
-mma.m.e2<-mma.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),alpha=1,
-                  alpha1=0.05,alpha2=0.05,n2=3)  #use only the test results.
-mma.m.e2.2<-mma.big(data=data.m.e2.2,alpha1=0.05,alpha2=0.05,n2=3)  #use only the test results.
-summary(mma.m.e2)
-summary(mma.m.e2.2,RE=TRUE)
-plot(mma.m.e2,vari="m11")
-plot(mma.m.e2,vari="m16")
+#med.m.e2.2<-med.big(data.m.e2.2)
+#med.m.e2.2
+#mma.m.e2<-mma.big(x=m,y=data.frame(y),mediator=1:ncol(m),pred=data.frame(pred),alpha=1,
+#                  alpha1=0.05,alpha2=0.05,n2=3)  #use only the test results.
+#mma.m.e2.2<-mma.big(data=data.m.e2.2,alpha1=0.05,alpha2=0.05,n2=3)  #use only the test results.
+#summary(mma.m.e2)
+#summary(mma.m.e2.2,RE=TRUE)
+#plot(mma.m.e2,vari="m11")
+#plot(mma.m.e2,vari="m16")
 
 #c.time-to-event y
 lambda=1/500
