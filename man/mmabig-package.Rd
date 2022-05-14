@@ -30,6 +30,8 @@ Yu, Q., Scribner, R.A., Leonardi, C., Zhang, L., Park, C., Chen, L., and Simonse
 Yu, Q., and Li, B. (2017) <doi:10.5334/hors.160>. "mma: An r package for multiple mediation analysis," Journal of Open Research Software, 5(1), 11. 
 
 Li, B. and Yu, Q. (2018). "Mediation Analysis with Large Data Sets". 
+
+Yu, Q. and Li, B., 2022. Statistical Methods for Mediation, Confounding and Moderation Analysis Using R and SAS. Chapman and Hall/CRC. ISBN 9780367365479.
 }
 \keyword{ Package }
 

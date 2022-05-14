@@ -57,7 +57,7 @@ y_type<-rep(4,ny)                     #1 is continuous, 2 is binary, 3 is multi-
 if(is.null(family1))
   family1=as.list(rep(NA,ncol(data.frame(y))))
 for (i in 1:ny)
-{if(class(y2[,i])!="Surv"){
+{if(!is(y2[,i],"Surv")){
   if(nlevels(droplevels(as.factor(y2[,i])))==2)   
   {y_type[i]<-2
    if(is.na(family1[[i]]))
@@ -344,7 +344,6 @@ a1<-c(contmed,binmed,catmed)
 a2<-c(covr.cont,covr.bin,covr.cat)
 
 cutx<-a1[!a2]
-
 if (sum(a2)==0)
   return ("no mediators found")
 else if(length(cutx)==0)
@@ -354,7 +353,8 @@ else if(length(cutx)==0)
  catm1<-catmed
  catref1<-catref
 }
-else {newx1<-x[,-cutx]
+else {newx1<-data.frame(x[,-cutx])
+      colnames(newx1)=colnames(x)[-cutx]
       if(sum(covr.cont)==0)
        contm1<-NULL  
       else 
@@ -587,7 +587,7 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
     surv=rep(F,ncol(y))
     biny=rep(F,ncol(y))
     for(j in 1:ncol(y)) {
-      if(class(y[,j])=="Surv"){
+      if(is(y[,j],"Surv")){
         surv[j]=T
         if(is.null(type))
           type="response"
@@ -711,15 +711,15 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
     {dm<-NULL
      ref=apply(dirx!=0,1,sum)==0  #the reference group are all zeros. 
      if(is.null(w))
-       means=apply(x[ref,c(binm1,contm)],2,mean)
+       means=apply(as.matrix(x[ref,c(binm1,contm)]),2,mean)
      else
-       means=apply(x[ref,c(binm1,contm)],2,weighted.mean,w[ref])
+       means=apply(as.matrix(x[ref,c(binm1,contm)]),2,weighted.mean,w[ref])
 
      for (j in 1:ncol(dirx)){  
        if(is.null(w))
-         means1<-apply(x[dirx[,j]==1,c(binm1,contm)],2,mean)
+         means1<-apply(as.matrix(x[dirx[,j]==1,c(binm1,contm)]),2,mean)
        else
-         means1<-apply(x[dirx[,j]==1,c(binm1,contm)],2,weighted.mean,w[dirx[,j]==1])
+         means1<-apply(as.matrix(x[dirx[,j]==1,c(binm1,contm)]),2,weighted.mean,w[dirx[,j]==1])
           dm<-rbind(dm,means1-means)
         } 
      colnames(dm)=m.names
@@ -751,7 +751,8 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
     allm<-unique(c(contm,binm,unlist(tempm)))
     
     nonmissing<-apply(cbind(y,x,dirx),1,anymissing)
-    x<-x[nonmissing,]
+    x=data.frame(x[nonmissing,])
+    colnames(x)<-xnames
     y<-data.frame(y[nonmissing,])
     colnames(y)<-ynames
     pred<-data.frame(dirx[nonmissing,])
@@ -790,7 +791,10 @@ med.big<-function(data, x=data$x, y=data$y, dirx=data$dirx, binm=data$binm, cont
     diag1<-rep(1,ncol(x))
     deltaM<-apply(abs(diag.temp),2,max)
     diag1[c(binm1,contm)]=1/deltaM
-    x.star<-data.matrix(x)%*%diag(diag1)
+    if(length(diag1)>1)
+      x.star<-data.matrix(x)%*%diag(diag1)
+    else
+      x.star=x*diag1
     x2<-cbind(x.star,pred)
     colnames(x2)<-c(xnames,pred_names)
     full.model<-vector("list",ncol(y))  #D items, with dth item the model for the dth response
@@ -930,7 +934,7 @@ mma.big<-function(data=NULL,x=data$x, y=data$y,pred=data$dirx, mediator=NULL, bi
 {if(is.null(data)){
   mediator=unique(c(contm,mediator,binm,catm,jointm))
   data=data.org.big(x,y,pred,mediator,contmed=contm,binmed=binm,binref=binref,catmed=catm,
-                    catref=catref,jointm=mediator,family1=family1,predref=predref,
+                    catref=catref,jointm=jointm,family1=family1,predref=predref,
                     alpha=alpha,alpha1=alpha1,alpha2=alpha2, testtype=1, w=w)
   x=data$x
   y=data$y
@@ -988,7 +992,6 @@ colnames(deltaM)=xnames[c(binm1,contm)]
 names(dm)=colnames(pred)
 names(coef)=colnames(y)
 bootresults=coef
-
 results<-med.big(data=data,margin=margin,df=df,type=type,w=w,alpha=alpha,lambda=lambda)
 
 for (i in 1:n2)

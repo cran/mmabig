@@ -12,6 +12,7 @@ importFrom("stats", "binomial", "chisq.test", "cor.test", "gaussian",
 importFrom("graphics", "abline", "polygon")
 importFrom("stats", "scatter.smooth")
 importFrom("stats", "weighted.mean")
+importFrom("methods", "is")
 S3method(summary,med_iden.big)
 S3method(print,summary.med_iden.big)
 S3method(print,med.big)
