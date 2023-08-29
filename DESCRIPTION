@@ -1,8 +1,8 @@
 Package: mmabig
 Type: Package
 Title: Multiple Mediation Analysis for Big Data Sets
-Version: 3.1-0
-Date: 2022-05-14
+Version: 3.2-0
+Date: 2023-08-29
 Author: Qingzhao Yu and Bin Li
 Maintainer: Qingzhao Yu <qyu@lsuhsc.edu>
 Depends: R (>= 2.14.1), glmnet, mma, splines, survival, car
@@ -16,6 +16,6 @@ URL: https://www.r-project.org,
         https://publichealth.lsuhsc.edu/Faculty_pages/qyu/index.html
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2022-05-14 23:56:46 UTC; qyu
+Packaged: 2023-08-29 15:46:44 UTC; qyu
 Repository: CRAN
-Date/Publication: 2022-05-15 00:10:02 UTC
+Date/Publication: 2023-08-29 17:00:02 UTC
